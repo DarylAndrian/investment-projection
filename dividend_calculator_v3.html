@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEPI & SCHD Dividend Calculator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f9f9f7;color:#1a1a1a;padding:24px;font-size:15px}
+h1{font-size:20px;font-weight:500;margin-bottom:1.5rem;color:#1a1a1a}
+.tabs{display:flex;gap:8px;margin-bottom:1.5rem}
+.tab{padding:7px 20px;border-radius:8px;border:0.5px solid #ccc;background:transparent;color:#666;font-size:14px;cursor:pointer}
+.tab.active{background:#f0f0ee;color:#1a1a1a;border-color:#999;font-weight:500}
+.slabel{font-size:12px;color:#666;margin-bottom:4px;letter-spacing:.03em}
+.srow{display:flex;align-items:center;gap:12px;margin-bottom:1.1rem}
+.srow input[type=range]{flex:1;accent-color:#378ADD}
+.sval{font-size:14px;font-weight:500;min-width:72px;text-align:right;color:#1a1a1a}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.25rem}
+.mc{background:#f0f0ee;border-radius:8px;padding:12px 14px}
+.mc .ml{font-size:12px;color:#666;margin-bottom:4px}
+.mc .mv{font-size:19px;font-weight:500;color:#1a1a1a}
+.mc .ms{font-size:11px;color:#999;margin-top:2px}
+.goal-banner{background:#f0f0ee;border-radius:8px;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:.75rem;flex-wrap:wrap;gap:6px}
+.ok{color:#3B6D11;font-weight:500}
+.no{color:#993C1D;font-weight:500}
+.warn{color:#854F0B;font-weight:500}
+.er-banner{background:#fff;border:0.5px solid #ddd;border-radius:8px;padding:14px 16px;margin-bottom:1.25rem;font-size:13px}
+.er-banner .er-title{font-weight:500;color:#1a1a1a;margin-bottom:8px;font-size:14px}
+.er-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid #eee}
+.er-row:last-child{border-bottom:none}
+.er-k{color:#666}
+.er-v{font-weight:500;color:#1a1a1a}
+.er-v.neg{color:#993C1D}
+.ttg-box{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:14px 16px;margin-bottom:1.25rem}
+.ttg-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:0.5px solid #eee;font-size:13px}
+.ttg-row:last-child{border-bottom:none}
+.ttg-k{color:#666}
+.ttg-v{font-weight:500;color:#1a1a1a}
+.ttg-v.hi{color:#185FA5}
+.ttg-v.drag{color:#993C1D}
+.leg{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:8px;font-size:12px;color:#666}
+.leg span{display:flex;align-items:center;gap:5px}
+.leg i{width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0}
+.etf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.ec{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:14px 16px}
+.ec.feat{border:2px solid #378ADD}
+.etag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px;margin-bottom:8px}
+.etag.j{background:#E6F1FB;color:#0C447C}
+.etag.s{background:#EAF3DE;color:#3B6D11}
+.etag.r{background:#E6F1FB;color:#0C447C;margin-left:4px}
+.en{font-size:14px;font-weight:500;color:#1a1a1a;margin-bottom:2px}
+.ed{font-size:12px;color:#666;margin-bottom:10px}
+.es{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:.5px solid #eee}
+.es:last-child{border-bottom:none}
+.ek{color:#666}
+.ev{font-weight:500;color:#1a1a1a}
+.ev.neg{color:#993C1D}
+</style>
+</head>
+<body>
+<h1>JEPI &amp; SCHD dividend calculator</h1>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('single')">Single ETF</button>
+  <button class="tab" onclick="showTab('split')">JEPI + SCHD split</button>
+  <button class="tab" onclick="showTab('compare')">Compare</button>
+</div>
+
+<div id="tab-single">
+  <div style="display:flex;gap:8px;margin-bottom:1.1rem">
+    <button class="tab active" id="bj" onclick="selEtf('JEPI')">JEPI</button>
+    <button class="tab" id="bs" onclick="selEtf('SCHD')">SCHD</button>
+  </div>
+  <p class="slabel">Starting investment (USD)</p>
+  <div class="srow"><input type="range" min="0" max="20000" step="100" value="2000" id="s-amt" oninput="us()"><span class="sval" id="o-amt">$2,000</span></div>
+  <p class="slabel">Monthly top-up (USD)</p>
+  <div class="srow"><input type="range" min="0" max="1000" step="10" value="100" id="s-mo" oninput="us()"><span class="sval" id="o-mo">$100/mo</span></div>
+  <p class="slabel">Target monthly income (after tax)</p>
+  <div class="srow"><input type="range" min="5" max="200" step="5" value="30" id="s-tgt" oninput="us()"><span class="sval" id="o-tgt">$30/mo</span></div>
+  <p class="slabel">Withholding tax</p>
+  <div class="srow"><input type="range" min="0" max="30" step="5" value="30" id="s-tax" oninput="us()"><span class="sval" id="o-tax">30%</span></div>
+  <div class="cards" id="s-cards"></div>
+  <div class="goal-banner" id="s-goal"></div>
+  <div class="er-banner" id="s-er"></div>
+  <div class="ttg-box" id="s-ttg"></div>
+  <div class="leg" id="s-leg"></div>
+  <div style="position:relative;width:100%;height:260px"><canvas id="cs"></canvas></div>
+</div>
+
+<div id="tab-split" style="display:none">
+  <p class="slabel">Starting investment (USD)</p>
+  <div class="srow"><input type="range" min="0" max="20000" step="100" value="2000" id="sp-amt" oninput="usp()"><span class="sval" id="o-sp-amt">$2,000</span></div>
+  <p class="slabel">Monthly top-up (USD)</p>
+  <div class="srow"><input type="range" min="0" max="1000" step="10" value="100" id="sp-mo" oninput="usp()"><span class="sval" id="o-sp-mo">$100/mo</span></div>
+  <p class="slabel">JEPI allocation</p>
+  <div class="srow"><input type="range" min="10" max="90" step="5" value="60" id="sp-jp" oninput="usp()"><span class="sval" id="o-sp-jp">60%</span></div>
+  <p class="slabel">Target monthly income (after tax)</p>
+  <div class="srow"><input type="range" min="5" max="200" step="5" value="30" id="sp-tgt" oninput="usp()"><span class="sval" id="o-sp-tgt">$30/mo</span></div>
+  <p class="slabel">Withholding tax</p>
+  <div class="srow"><input type="range" min="0" max="30" step="5" value="30" id="sp-tax" oninput="usp()"><span class="sval" id="o-sp-tax">30%</span></div>
+  <div class="cards" id="sp-cards"></div>
+  <div class="goal-banner" id="sp-goal"></div>
+  <div class="er-banner" id="sp-er"></div>
+  <div class="ttg-box" id="sp-ttg"></div>
+  <div class="leg" id="sp-leg"></div>
+  <div style="position:relative;width:100%;height:260px"><canvas id="csp"></canvas></div>
+</div>
+
+<div id="tab-compare" style="display:none">
+  <div class="etf-grid" id="cmp-cards"></div>
+  <p style="font-size:12px;color:#888">Based on $2,000 start + $100/mo top-up, 30% withholding tax, $30/mo target.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const ETF={
+  JEPI:{yield:0.0826,er:0.0035,freq:12,label:'JEPI',color:'#378ADD'},
+  SCHD:{yield:0.0335,er:0.0006,freq:4,label:'SCHD',color:'#639922'}
+};
+let curEtf='JEPI',cS=null,cSp=null;
+function f2(n){return '$'+n.toFixed(2)}
+function fk(n){return n>=1000?'$'+(n/1000).toFixed(1)+'k':'$'+Math.round(n)}
+function fp(n){return (n*100).toFixed(2)+'%'}
+function netYield(etf){return etf.yield-etf.er}
+function monthlyNet(etf,amount,tax){return(amount*netYield(etf)/12)*(1-tax/100)}
+function annualERcost(etf,amount){return amount*etf.er}
+function timeToGoal(etf,start,monthly,target,tax){
+  if(monthlyNet(etf,start,tax)>=target)return{months:0,finalAmt:start};
+  let bal=start;
+  for(let m=1;m<=600;m++){bal+=monthly;if(monthlyNet(etf,bal,tax)>=target)return{months:m,finalAmt:Math.round(bal)};}
+  return{months:null,finalAmt:null};
+}
+function buildGrowthData(etf,start,monthly,tax,months){
+  const pts=[];let bal=start;
+  for(let m=0;m<=months;m++){pts.push({x:m,bal:Math.round(bal),div:+monthlyNet(etf,bal,tax).toFixed(2)});if(m<months)bal+=monthly;}
+  return pts;
+}
+function selEtf(e){
+  curEtf=e;
+  document.getElementById('bj').className='tab'+(e==='JEPI'?' active':'');
+  document.getElementById('bs').className='tab'+(e==='SCHD'?' active':'');
+  us();
+}
+function erBannerHTML(etf,amount,label){
+  const erCost=annualERcost(etf,amount);
+  return`<div class="er-title">Expense ratio impact — ${label}</div>
+    <div class="er-row"><span class="er-k">Gross dividend yield</span><span class="er-v">${fp(etf.yield)}</span></div>
+    <div class="er-row"><span class="er-k">Expense ratio (annual)</span><span class="er-v neg">−${fp(etf.er)}</span></div>
+    <div class="er-row"><span class="er-k">Net effective yield</span><span class="er-v">${fp(netYield(etf))}</span></div>
+    <div class="er-row"><span class="er-k">Annual ER drag on portfolio</span><span class="er-v neg">−${f2(erCost)}/yr</span></div>
+    <div class="er-row"><span class="er-k">Monthly ER drag</span><span class="er-v neg">−${f2(erCost/12)}/mo</span></div>`;
+}
+function us(){
+  const amt=+document.getElementById('s-amt').value;
+  const mo=+document.getElementById('s-mo').value;
+  const tgt=+document.getElementById('s-tgt').value;
+  const tax=+document.getElementById('s-tax').value;
+  document.getElementById('o-amt').textContent='$'+amt.toLocaleString();
+  document.getElementById('o-mo').textContent='$'+mo+'/mo';
+  document.getElementById('o-tgt').textContent='$'+tgt+'/mo';
+  document.getElementById('o-tax').textContent=tax+'%';
+  const etf=ETF[curEtf];
+  const nowDiv=monthlyNet(etf,amt,tax);
+  const grossDiv=(amt*etf.yield/12)*(1-tax/100);
+  const{months,finalAmt}=timeToGoal(etf,amt,mo,tgt,tax);
+  const dispM=Math.min(months??120,120);
+  document.getElementById('s-cards').innerHTML=`
+    <div class="mc"><div class="ml">Gross monthly div</div><div class="mv">${f2(grossDiv)}</div><div class="ms">before ER drag</div></div>
+    <div class="mc"><div class="ml">Net monthly div</div><div class="mv">${f2(nowDiv)}</div><div class="ms">after ER + ${tax}% tax</div></div>
+    <div class="mc"><div class="ml">Time to $${tgt}/mo</div><div class="mv">${months===0?'Now':months?months+' mo':'50yr+'}</div><div class="ms">${months&&months>0?Math.ceil(months/12)+' yr':''}</div></div>
+    <div class="mc"><div class="ml">Annual ER cost</div><div class="mv">${f2(annualERcost(etf,amt))}</div><div class="ms">${fp(etf.er)} of portfolio</div></div>`;
+  const ok=nowDiv>=tgt;
+  document.getElementById('s-goal').innerHTML=`<span>Target: $${tgt}/mo after tax</span><span class="${ok?'ok':months&&months<=36?'warn':'no'}">${ok?'Already reached':months?months+' months to go':'50yr+'} · now ${f2(nowDiv)}/mo</span>`;
+  document.getElementById('s-er').innerHTML=erBannerHTML(etf,Math.max(amt,1),'at current investment');
+  const ttg=months&&months>0?`
+    <div class="ttg-row"><span class="ttg-k">Months needed</span><span class="ttg-v hi">${months} months (${Math.ceil(months/12)} yr${months%12?' '+(months%12)+' mo':''})</span></div>
+    <div class="ttg-row"><span class="ttg-k">Portfolio at goal</span><span class="ttg-v">${fk(finalAmt??0)}</span></div>
+    <div class="ttg-row"><span class="ttg-k">Total you invest</span><span class="ttg-v">${fk(amt+mo*months)}</span></div>
+    <div class="ttg-row"><span class="ttg-k">Annual ER at goal</span><span class="ttg-v drag">−${f2(annualERcost(etf,finalAmt??0))}/yr</span></div>
+    <div class="ttg-row"><span class="ttg-k">Net monthly income at goal</span><span class="ttg-v ok">$${tgt.toFixed(2)}/mo</span></div>`:
+    months===0?`<div class="ttg-row"><span class="ttg-k">Status</span><span class="ttg-v ok">Already generating ${f2(nowDiv)}/mo — goal reached!</span></div>`:
+    `<div class="ttg-row"><span class="ttg-k">Status</span><span class="ttg-v no">At $${mo}/mo top-up, goal would take 50+ years. Increase contribution or lower target.</span></div>`;
+  document.getElementById('s-ttg').innerHTML=ttg;
+  const pts=buildGrowthData(etf,amt,mo,tax,dispM);
+  const labels=pts.map(p=>p.x===0?'Now':(p.x%12===0?p.x/12+'yr':''));
+  document.getElementById('s-leg').innerHTML=`<span><i style="background:${etf.color}"></i>Portfolio value</span><span><i style="background:#D85A30"></i>Net monthly income</span>`;
+  if(cS)cS.destroy();
+  cS=new Chart(document.getElementById('cs'),{type:'line',data:{labels,datasets:[
+    {label:'Portfolio',data:pts.map(p=>p.bal),borderColor:etf.color,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0.3,yAxisID:'yL'},
+    {label:'Net income',data:pts.map(p=>p.div),borderColor:'#D85A30',backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0.3,borderDash:[5,3],yAxisID:'yR'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:8}},
+    yL:{position:'left',ticks:{callback:v=>fk(v)}},
+    yR:{position:'right',grid:{drawOnChartArea:false},ticks:{callback:v=>'$'+v.toFixed(0)}}
+  }}});
+}
+function usp(){
+  const amt=+document.getElementById('sp-amt').value;
+  const mo=+document.getElementById('sp-mo').value;
+  const jp=+document.getElementById('sp-jp').value;
+  const sp=100-jp;
+  const tgt=+document.getElementById('sp-tgt').value;
+  const tax=+document.getElementById('sp-tax').value;
+  document.getElementById('o-sp-amt').textContent='$'+amt.toLocaleString();
+  document.getElementById('o-sp-mo').textContent='$'+mo+'/mo';
+  document.getElementById('o-sp-jp').textContent=jp+'%';
+  document.getElementById('o-sp-tgt').textContent='$'+tgt+'/mo';
+  document.getElementById('o-sp-tax').textContent=tax+'%';
+  const jAmt=amt*jp/100,sAmt=amt*sp/100;
+  const nowJ=monthlyNet(ETF.JEPI,jAmt,tax);
+  const nowS=monthlyNet(ETF.SCHD,sAmt,tax)/3;
+  const nowBlend=nowJ+nowS;
+  const grossJ=(jAmt*ETF.JEPI.yield/12)*(1-tax/100);
+  const grossS=(sAmt*ETF.SCHD.yield/12/3)*(1-tax/100);
+  const totalERannual=annualERcost(ETF.JEPI,jAmt)+annualERcost(ETF.SCHD,sAmt);
+  let bal=amt,months=null;
+  for(let m=1;m<=600;m++){
+    bal+=mo;
+    const jB=bal*jp/100,sB=bal*sp/100;
+    if(monthlyNet(ETF.JEPI,jB,tax)+monthlyNet(ETF.SCHD,sB,tax)/3>=tgt){months=m;break;}
+  }
+  const finalAmt=months?Math.round(amt+mo*months):null;
+  const finalJAmt=finalAmt?finalAmt*jp/100:0;
+  const finalSAmt=finalAmt?finalAmt*sp/100:0;
+  const finalER=finalAmt?annualERcost(ETF.JEPI,finalJAmt)+annualERcost(ETF.SCHD,finalSAmt):0;
+  document.getElementById('sp-cards').innerHTML=`
+    <div class="mc"><div class="ml">JEPI net monthly</div><div class="mv">${f2(nowJ)}</div><div class="ms">${jp}% · ER ${fp(ETF.JEPI.er)}</div></div>
+    <div class="mc"><div class="ml">SCHD net monthly</div><div class="mv">${f2(nowS)}</div><div class="ms">${sp}% · ÷3 quarterly</div></div>
+    <div class="mc"><div class="ml">Blended monthly</div><div class="mv">${f2(nowBlend)}</div><div class="ms">after ER + ${tax}% tax</div></div>
+    <div class="mc"><div class="ml">Combined ER cost</div><div class="mv">${f2(totalERannual)}</div><div class="ms">per year on $${amt.toLocaleString()}</div></div>`;
+  const ok=nowBlend>=tgt;
+  document.getElementById('sp-goal').innerHTML=`<span>Target: $${tgt}/mo (blended)</span><span class="${ok?'ok':months&&months<=36?'warn':'no'}">${ok?'Already reached':months?months+' months to go':'50yr+'} · now ${f2(nowBlend)}/mo</span>`;
+  document.getElementById('sp-er').innerHTML=`<div class="er-title">Expense ratio breakdown — JEPI ${jp}% / SCHD ${sp}%</div>
+    <div class="er-row"><span class="er-k">JEPI ER (${fp(ETF.JEPI.er)}) on ${fk(jAmt)}</span><span class="er-v neg">−${f2(annualERcost(ETF.JEPI,jAmt))}/yr</span></div>
+    <div class="er-row"><span class="er-k">SCHD ER (${fp(ETF.SCHD.er)}) on ${fk(sAmt)}</span><span class="er-v neg">−${f2(annualERcost(ETF.SCHD,sAmt))}/yr</span></div>
+    <div class="er-row"><span class="er-k">Total annual ER drag</span><span class="er-v neg">−${f2(totalERannual)}/yr (−${f2(totalERannual/12)}/mo)</span></div>
+    <div class="er-row"><span class="er-k">Gross blended monthly</span><span class="er-v">${f2(grossJ+grossS)}</span></div>
+    <div class="er-row"><span class="er-k">Net blended monthly</span><span class="er-v">${f2(nowBlend)}</span></div>`;
+  const ttg=months&&!ok?`
+    <div class="ttg-row"><span class="ttg-k">Months needed</span><span class="ttg-v hi">${months} months (${Math.ceil(months/12)} yr)</span></div>
+    <div class="ttg-row"><span class="ttg-k">Final portfolio</span><span class="ttg-v">${fk(finalAmt??0)}</span></div>
+    <div class="ttg-row"><span class="ttg-k">JEPI portion (${jp}%)</span><span class="ttg-v">${fk(finalJAmt)}</span></div>
+    <div class="ttg-row"><span class="ttg-k">SCHD portion (${sp}%)</span><span class="ttg-v">${fk(finalSAmt)}</span></div>
+    <div class="ttg-row"><span class="ttg-k">Annual ER at goal</span><span class="ttg-v drag">−${f2(finalER)}/yr</span></div>
+    <div class="ttg-row"><span class="ttg-k">Total you invest</span><span class="ttg-v">${fk(amt+mo*months)}</span></div>`:
+    ok?`<div class="ttg-row"><span class="ttg-k">Status</span><span class="ttg-v ok">Already generating ${f2(nowBlend)}/mo — goal reached!</span></div>`:
+    `<div class="ttg-row"><span class="ttg-k">Status</span><span class="ttg-v no">At $${mo}/mo this would take 50+ years. Increase contribution or adjust target.</span></div>`;
+  document.getElementById('sp-ttg').innerHTML=ttg;
+  const dispM=Math.min(months||120,120);
+  const pts=[];let b=amt;
+  for(let m=0;m<=dispM;m++){
+    const jB=b*jp/100,sB=b*sp/100;
+    pts.push({x:m,bal:Math.round(b),div:+(monthlyNet(ETF.JEPI,jB,tax)+monthlyNet(ETF.SCHD,sB,tax)/3).toFixed(2)});
+    if(m<dispM)b+=mo;
+  }
+  const labels=pts.map(p=>p.x===0?'Now':(p.x%12===0?p.x/12+'yr':''));
+  document.getElementById('sp-leg').innerHTML=`<span><i style="background:#7F77DD"></i>Portfolio value</span><span><i style="background:#D85A30"></i>Net blended income</span>`;
+  if(cSp)cSp.destroy();
+  cSp=new Chart(document.getElementById('csp'),{type:'line',data:{labels,datasets:[
+    {label:'Portfolio',data:pts.map(p=>p.bal),borderColor:'#7F77DD',backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0.3,yAxisID:'yL'},
+    {label:'Net income',data:pts.map(p=>p.div),borderColor:'#D85A30',backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0.3,borderDash:[5,3],yAxisID:'yR'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:8}},
+    yL:{position:'left',ticks:{callback:v=>fk(v)}},
+    yR:{position:'right',grid:{drawOnChartArea:false},ticks:{callback:v=>'$'+v.toFixed(0)}}
+  }}});
+}
+function buildCmp(){
+  const amt=2000,mo=100,tax=30,tgt=30;
+  const html=Object.entries(ETF).map(([k,etf])=>{
+    const nowDiv=monthlyNet(etf,amt,tax);
+    const grossDiv=(amt*etf.yield/12)*(1-tax/100);
+    const erCost=annualERcost(etf,amt);
+    const{months,finalAmt}=timeToGoal(etf,amt,mo,tgt,tax);
+    const isRec=k==='JEPI';
+    return`<div class="ec${isRec?' feat':''}">
+      <span class="etag ${k==='JEPI'?'j':'s'}">${k}</span>${isRec?'<span class="etag r">Recommended</span>':''}
+      <div class="en">${k==='JEPI'?'JPMorgan Equity Premium':'Schwab US Dividend Equity'}</div>
+      <div class="ed">${k==='JEPI'?'Monthly · covered calls':'Quarterly · dividend growth'}</div>
+      <div class="es"><span class="ek">Gross yield</span><span class="ev">${fp(etf.yield)}</span></div>
+      <div class="es"><span class="ek">Expense ratio</span><span class="ev neg">−${fp(etf.er)}</span></div>
+      <div class="es"><span class="ek">Net effective yield</span><span class="ev">${fp(netYield(etf))}</span></div>
+      <div class="es"><span class="ek">ER cost on $2k/yr</span><span class="ev neg">−${f2(erCost)}</span></div>
+      <div class="es"><span class="ek">Gross monthly ($2k)</span><span class="ev">${f2(grossDiv)}</span></div>
+      <div class="es"><span class="ek">Net monthly ($2k)</span><span class="ev">${f2(nowDiv)}</span></div>
+      <div class="es"><span class="ek">Time to $30/mo</span><span class="ev">${months===0?'Now':months?months+' mo':'50yr+'}</span></div>
+      <div class="es"><span class="ek">Div growth/yr</span><span class="ev">${k==='JEPI'?'−1.5%':'+7.9%'}</span></div>
+    </div>`;
+  }).join('');
+  document.getElementById('cmp-cards').innerHTML=html;
+}
+function showTab(t){
+  ['single','split','compare'].forEach(id=>{document.getElementById('tab-'+id).style.display=id===t?'':'none';});
+  document.querySelectorAll('.tabs .tab').forEach((b,i)=>{b.className='tab'+(['single','split','compare'][i]===t?' active':'');});
+  if(t==='split')usp();
+  if(t==='compare')buildCmp();
+}
+us();
+</script>
+</body>
+</html>
