@@ -1,0 +1,15 @@
+/* Global Theme Variables */
+:root {
+  --primary-color: #3498db; /* Light blue for primary elements */
+  --background-color: #ffffff;
+  --text-color: #2c3e50;
+  --card-bg-color: #ecf0f1;
+}
+
+/* Dark Mode Overrides - Applied when document root has class .dark-mode */
+.dark-mode {
+  --primary-color: #9b59b6; /* Purple for dark mode primary */
+  --background-color: #2c3e50; /* Dark blue background */
+  --text-color: #ecf0f1; /* Light text on dark background */
+  --card-bg-color: #34495e; /* Slightly darker card background */
+}
