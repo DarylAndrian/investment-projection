@@ -24,6 +24,8 @@ function runSimulation(allocations, targetMonthlyIncome, taxRate) {
   let month = 0;
   const labels = [];
   const values = [];
+  const dividends = [];
+  let cumulativeTopUp = 0;
 
   for (month = 1; month <= MAX_MONTHS; month++) {
     // Calculate total dividend across all allocations
@@ -32,25 +34,27 @@ function runSimulation(allocations, targetMonthlyIncome, taxRate) {
       totalDiv += calculateDividend(alloc.balance, alloc.monthlyTopUp, alloc.etf, taxRate);
     }
 
-    // Record portfolio value for chart
+    // Record portfolio value and dividend for chart
     const totalBalance = allocations.reduce((sum, a) => sum + a.balance, 0);
     labels.push(`Month ${month}`);
     values.push(Math.floor(totalBalance));
+    dividends.push(Math.floor(totalDiv));
 
     // Check goal
     if (month > 1 && totalDiv >= targetMonthlyIncome) {
-      return { months: month, portfolioValue: totalBalance, reached: true, chartLabels: labels, chartValues: values };
+      return { months: month, portfolioValue: totalBalance, reached: true, chartLabels: labels, chartValues: values, chartDividends: dividends };
     }
 
     // Compound each allocation
     for (const alloc of allocations) {
       const monthlyGrowth = alloc.etf.growth / 12;
+      // Track cumulative top-up separately if needed, but here we simply add to balance
       alloc.balance = alloc.balance * (1 + monthlyGrowth) + alloc.monthlyTopUp;
     }
   }
 
   const finalBalance = allocations.reduce((sum, a) => sum + a.balance, 0);
-  return { months: MAX_MONTHS, portfolioValue: finalBalance, reached: false, chartLabels: labels, chartValues: values };
+  return { months: MAX_MONTHS, portfolioValue: finalBalance, reached: false, chartLabels: labels, chartValues: values, chartDividends: dividends };
 }
 
 export const useCalculatorStore = defineStore('calculator', {
@@ -70,7 +74,8 @@ export const useCalculatorStore = defineStore('calculator', {
       isGoalReached: false,
       metrics: {},
       chartLabels: [],
-      chartValues: []
+      chartValues: [],
+      chartDividends: []
     }
   }),
   getters: {
@@ -116,6 +121,7 @@ export const useCalculatorStore = defineStore('calculator', {
         isReached = simulation.reached;
         chartLabels = simulation.chartLabels;
         chartValues = simulation.chartValues;
+        chartDividends = simulation.chartDividends;
 
       } else if (this.selectedEtf === 'SPLIT') {
         const jepiBalance = start * splitRatio / 100;
@@ -145,6 +151,7 @@ export const useCalculatorStore = defineStore('calculator', {
         isReached = simulation.reached;
         chartLabels = simulation.chartLabels;
         chartValues = simulation.chartValues;
+        chartDividends = simulation.chartDividends;
       }
 
       this.results.currentNetDiv = netDivResult;
@@ -154,6 +161,7 @@ export const useCalculatorStore = defineStore('calculator', {
       this.results.metrics = { etfDetails };
       this.results.chartLabels = chartLabels;
       this.results.chartValues = chartValues;
+      this.results.chartDividends = chartDividends;
     }
   }
 });
