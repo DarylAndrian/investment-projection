@@ -19,18 +19,22 @@
       <div class="control-row">
         <label>Starting investment (USD)</label>
         <InputNumber v-model="inputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
+        <Slider v-model="inputs.startAmount" :min="0" :max="20000" :step="100" />
       </div>
       <div class="control-row">
         <label>Monthly top-up (USD)</label>
         <InputNumber v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
+        <Slider v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" />
       </div>
       <div class="control-row">
         <label>Target monthly income (after tax)</label>
         <InputNumber v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
+        <Slider v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" />
       </div>
       <div class="control-row">
         <label>Withholding tax</label>
         <InputNumber v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
+        <Slider v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" />
       </div>
 
       <!-- Results Cards -->
@@ -68,22 +72,27 @@
       <div class="control-row">
         <label>Starting investment (USD)</label>
         <InputNumber v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
+        <Slider v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" />
       </div>
       <div class="control-row">
         <label>Monthly top-up (USD)</label>
         <InputNumber v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
+        <Slider v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" />
       </div>
       <div class="control-row">
         <label>JEPI allocation</label>
         <InputNumber v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" suffix="%" />
+        <Slider v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" />
       </div>
       <div class="control-row">
         <label>Target monthly income (after tax)</label>
         <InputNumber v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
+        <Slider v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" />
       </div>
       <div class="control-row">
         <label>Withholding tax</label>
         <InputNumber v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
+        <Slider v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" />
       </div>
 
       <div class="cards">
