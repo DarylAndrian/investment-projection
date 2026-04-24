@@ -8,8 +8,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@pinia/vue": "^2.0.0",
-    "chart.js": "^4.4.3",
     "pinia": "^2.1.7",
     "vue": "^3.4.29"
   },

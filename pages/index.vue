@@ -30,9 +30,9 @@
 </template>
 
 <script setup>
-import { useCalculatorStore } from '@/stores/calculatorStore';
-import InputControls from '@/components/InputControls.vue';
-import MetricCard from '@/components/MetricCard.vue';
+import { useCalculatorStore } from '../stores/calculatorStore.js'
+import InputControls from '../components/InputControls.vue'
+import MetricCard from '../components/MetricCard.vue'
 // Assume ChartComponent exists and is imported
 
 const store = useCalculatorStore();
