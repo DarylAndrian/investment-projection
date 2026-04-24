@@ -4,16 +4,16 @@
 
     <!-- Tabs -->
     <div class="tabs">
-      <Button :class="{ 'p-button-outlined': activeTab !== 'single' }" label="Single ETF" @click="activeTab = 'single'" />
-      <Button :class="{ 'p-button-outlined': activeTab !== 'split' }" label="JEPI + SCHD Split" @click="activeTab = 'split'" />
-      <Button :class="{ 'p-button-outlined': activeTab !== 'compare' }" label="Compare" @click="activeTab = 'compare'" />
+      <button :class="{ 'p-button-outlined': activeTab !== 'single' }" @click="activeTab = 'single'">Single ETF</button>
+      <button :class="{ 'p-button-outlined': activeTab !== 'split' }" @click="activeTab = 'split'">JEPI + SCHD Split</button>
+      <button :class="{ 'p-button-outlined': activeTab !== 'compare' }" @click="activeTab = 'compare'">Compare</button>
     </div>
 
     <!-- SINGLE ETF TAB -->
     <div v-if="activeTab === 'single'" class="tab-panel">
       <div class="etf-switcher">
-        <Button :class="{ 'p-button-outlined': singleEtf !== 'JEPI' }" label="JEPI" @click="setEtf('JEPI')" />
-        <Button :class="{ 'p-button-outlined': singleEtf !== 'SCHD' }" label="SCHD" @click="setEtf('SCHD')" />
+        <button :class="{ 'p-button-outlined': singleEtf !== 'JEPI' }" @click="setEtf('JEPI')">JEPI</button>
+        <button :class="{ 'p-button-outlined': singleEtf !== 'SCHD' }" @click="setEtf('SCHD')">SCHD</button>
       </div>
 
       <div class="control-row">
@@ -248,6 +248,11 @@ store.calculate()
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
 .card-value { font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem; }
 .etf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.tabs button { padding: 8px 16px; border-radius: 6px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; font-size: 0.85rem; }
+.tabs button.p-button-outlined { background: transparent; border-color: #999; }
+.tabs button:hover { background: #e0e0e0; }
+.etf-switcher button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; font-size: 0.8rem; }
+.etf-switcher button.p-button-outlined { background: transparent; border-color: #999; }
 .en { font-weight: 600; margin-bottom: 0.25rem; }
 .ed { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
 .es { display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid #eee; }
