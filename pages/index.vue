@@ -22,7 +22,7 @@
 
     <!-- Placeholder for Chart Component -->
     <div v-if="activeTab === 'single'" class="chart-area">
-        <ChartComponent :data="calcData" />
+        <!-- ChartComponent not implemented yet -->
     </div>
 
 
@@ -30,10 +30,11 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useCalculatorStore } from '../stores/calculatorStore.js'
 import InputControls from '../components/InputControls.vue'
 import MetricCard from '../components/MetricCard.vue'
-// Assume ChartComponent exists and is imported
+// ChartComponent missing — skip for now
 
 const store = useCalculatorStore();
 const activeTab = ref('single'); 
@@ -50,6 +51,9 @@ function setActiveTab(tabName) {
 function updateStoreValue(key, value) {
     store.updateInput(key, value);
 }
+
+// Placeholder calcData for ChartComponent to avoid runtime errors
+const calcData = ref({ labels: [], datasets: [] });
 </script>
 
 <style scoped>
