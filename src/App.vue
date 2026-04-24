@@ -4,16 +4,16 @@
 
     <!-- Tabs -->
     <div class="tabs">
-      <button :class="{ 'p-button-outlined': activeTab !== 'single' }" @click="activeTab = 'single'">Single ETF</button>
-      <button :class="{ 'p-button-outlined': activeTab !== 'split' }" @click="activeTab = 'split'">JEPI + SCHD Split</button>
-      <button :class="{ 'p-button-outlined': activeTab !== 'compare' }" @click="activeTab = 'compare'">Compare</button>
+      <Button :class="{ 'p-button-outlined': activeTab !== 'single' }" label="Single ETF" @click="activeTab = 'single'" />
+      <Button :class="{ 'p-button-outlined': activeTab !== 'split' }" label="JEPI + SCHD Split" @click="activeTab = 'split'" />
+      <Button :class="{ 'p-button-outlined': activeTab !== 'compare' }" label="Compare" @click="activeTab = 'compare'" />
     </div>
 
     <!-- SINGLE ETF TAB -->
     <div v-if="activeTab === 'single'" class="tab-panel">
       <div class="etf-switcher">
-        <button :class="{ 'p-button-outlined': singleEtf !== 'JEPI' }" @click="setEtf('JEPI')">JEPI</button>
-        <button :class="{ 'p-button-outlined': singleEtf !== 'SCHD' }" @click="setEtf('SCHD')">SCHD</button>
+        <Button :class="{ 'p-button-outlined': singleEtf !== 'JEPI' }" label="JEPI" @click="setEtf('JEPI')" />
+        <Button :class="{ 'p-button-outlined': singleEtf !== 'SCHD' }" label="SCHD" @click="setEtf('SCHD')" />
       </div>
 
       <div class="control-row">
