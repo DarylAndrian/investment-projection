@@ -7,10 +7,12 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   title: String,
   value: [String, Number], 
-  isSuccess: { type: Boolean, default: false } // Helper for styling success states
+  isSuccess: { type: Boolean, default: false }
 })
 
 // Simple computed formatting logic here (e.g., currency formatting)
