@@ -8,11 +8,6 @@ const ETF = {
 
 /**
  * Calculates the monthly dividend payout based on current assets and ETF specifics.
- * @param {number} balance - Current portfolio balance
- * @param {number} monthlyTopUp - Monthly contribution
- * @param {Object} etf - The ETF object from constants
- * @param {number} taxRate - Tax rate percentage
- * @returns {number} Net monthly dividend ($)
  */
 function calculateDividend(balance, monthlyTopUp, etf, taxRate) {
   const annualDiv = (balance + monthlyTopUp) * etf.yield;
@@ -22,15 +17,13 @@ function calculateDividend(balance, monthlyTopUp, etf, taxRate) {
 }
 
 /**
- * Runs monthly simulation for a single ETF or combined portfolio
- * @param {Array} allocations - Array of { etf, balance, monthlyTopUp }
- * @param {number} targetMonthlyIncome - Target after-tax monthly income
- * @param {number} taxRate - Tax rate percentage
- * @returns {Object} Simulation results
+ * Runs monthly simulation, returns results + chart data (labels + values over months).
  */
 function runSimulation(allocations, targetMonthlyIncome, taxRate) {
   const MAX_MONTHS = 300; // 25 years
   let month = 0;
+  const labels = [];
+  const values = [];
 
   for (month = 1; month <= MAX_MONTHS; month++) {
     // Calculate total dividend across all allocations
@@ -39,10 +32,14 @@ function runSimulation(allocations, targetMonthlyIncome, taxRate) {
       totalDiv += calculateDividend(alloc.balance, alloc.monthlyTopUp, alloc.etf, taxRate);
     }
 
+    // Record portfolio value for chart
+    const totalBalance = allocations.reduce((sum, a) => sum + a.balance, 0);
+    labels.push(`Month ${month}`);
+    values.push(Math.floor(totalBalance));
+
     // Check goal
     if (month > 1 && totalDiv >= targetMonthlyIncome) {
-      const totalBalance = allocations.reduce((sum, a) => sum + a.balance, 0);
-      return { months: month, portfolioValue: totalBalance, reached: true };
+      return { months: month, portfolioValue: totalBalance, reached: true, chartLabels: labels, chartValues: values };
     }
 
     // Compound each allocation
@@ -52,33 +49,32 @@ function runSimulation(allocations, targetMonthlyIncome, taxRate) {
     }
   }
 
-  const totalBalance = allocations.reduce((sum, a) => sum + a.balance, 0);
-  return { months: MAX_MONTHS, portfolioValue: totalBalance, reached: false };
+  const finalBalance = allocations.reduce((sum, a) => sum + a.balance, 0);
+  return { months: MAX_MONTHS, portfolioValue: finalBalance, reached: false, chartLabels: labels, chartValues: values };
 }
-
 
 export const useCalculatorStore = defineStore('calculator', {
   state: () => ({
-    // --- USER INPUT STATE ---
-    selectedEtf: 'JEPI', 
+    selectedEtf: 'JEPI',
     inputs: {
-      startAmount: 2000, // Starting investment (USD)
-      monthlyTopUp: 100, // Monthly top-up (USD)
-      targetMonthlyIncome: 30, // Goal income target (after tax)
-      withholdingTax: 30, // Withholding tax (%)
-      splitAllocationRatio: 60, // Used if selectedEtf is 'SPLIT'
+      startAmount: 2000,
+      monthlyTopUp: 100,
+      targetMonthlyIncome: 30,
+      withholdingTax: 30,
+      splitAllocationRatio: 60
     },
-    // --- RESULTS STATE ---
     results: {
       currentNetDiv: null,
       timeToGoalMonths: null,
       portfolioValueAtGoal: null,
       isGoalReached: false,
-      metrics: {} 
+      metrics: {},
+      chartLabels: [],
+      chartValues: []
     }
   }),
   getters: {
-    currentMetrics: (state) => state.results 
+    currentMetrics: (state) => state.results
   },
   actions: {
     setEtf(etfKey) {
@@ -100,15 +96,15 @@ export const useCalculatorStore = defineStore('calculator', {
       let finalValue = null;
       let isReached = false;
       let etfDetails = {};
+      let chartLabels = [];
+      let chartValues = [];
 
       if (this.selectedEtf === 'JEPI' || this.selectedEtf === 'SCHD') {
         const etf = ETF[this.selectedEtf];
 
-        // Current dividend (based on starting amount + first month top-up)
         netDivResult = calculateDividend(start, monthly, etf, tax);
         etfDetails = { name: etf.label, color: etf.color };
 
-        // Run simulation
         const simulation = runSimulation(
           [{ etf, balance: start, monthlyTopUp: monthly }],
           target,
@@ -118,6 +114,8 @@ export const useCalculatorStore = defineStore('calculator', {
         goalMonths = simulation.months;
         finalValue = Math.floor(simulation.portfolioValue);
         isReached = simulation.reached;
+        chartLabels = simulation.chartLabels;
+        chartValues = simulation.chartValues;
 
       } else if (this.selectedEtf === 'SPLIT') {
         const jepiBalance = start * splitRatio / 100;
@@ -125,7 +123,6 @@ export const useCalculatorStore = defineStore('calculator', {
         const jepiMonthly = monthly * splitRatio / 100;
         const schdMonthly = monthly - jepiMonthly;
 
-        // Current dividend
         netDivResult = calculateDividend(jepiBalance, jepiMonthly, ETF.JEPI, tax) +
                        calculateDividend(schdBalance, schdMonthly, ETF.SCHD, tax);
 
@@ -134,7 +131,6 @@ export const useCalculatorStore = defineStore('calculator', {
           { name: ETF.SCHD.label, color: ETF.SCHD.color, weight: 100 - splitRatio }
         ];
 
-        // Run split simulation
         const simulation = runSimulation(
           [
             { etf: ETF.JEPI, balance: jepiBalance, monthlyTopUp: jepiMonthly },
@@ -147,13 +143,17 @@ export const useCalculatorStore = defineStore('calculator', {
         goalMonths = simulation.months;
         finalValue = Math.floor(simulation.portfolioValue);
         isReached = simulation.reached;
+        chartLabels = simulation.chartLabels;
+        chartValues = simulation.chartValues;
       }
 
       this.results.currentNetDiv = netDivResult;
-      this.timeToGoalMonths = goalMonths;
-      this.portfolioValueAtGoal = finalValue;
-      this.isGoalReached = isReached;
+      this.results.timeToGoalMonths = goalMonths;
+      this.results.portfolioValueAtGoal = finalValue;
+      this.results.isGoalReached = isReached;
       this.results.metrics = { etfDetails };
+      this.results.chartLabels = chartLabels;
+      this.results.chartValues = chartValues;
     }
   }
 });

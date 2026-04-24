@@ -12,30 +12,25 @@
     <!-- SINGLE ETF TAB -->
     <div v-if="activeTab === 'single'" class="tab-panel">
       <div class="etf-switcher">
-        <Button :class="{ 'p-button-outlined': singleEtf !== 'JEPI' }" label="JEPI" @click="singleEtf = 'JEPI'" />
-        <Button :class="{ 'p-button-outlined': singleEtf !== 'SCHD' }" label="SCHD" @click="singleEtf = 'SCHD'" />
+        <Button :class="{ 'p-button-outlined': singleEtf !== 'JEPI' }" label="JEPI" @click="setEtf('JEPI')" />
+        <Button :class="{ 'p-button-outlined': singleEtf !== 'SCHD' }" label="SCHD" @click="setEtf('SCHD')" />
       </div>
 
-      <!-- Use PrimeVue InputNumber + Slider -->
       <div class="control-row">
         <label>Starting investment (USD)</label>
         <InputNumber v-model="inputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
-        <Slider v-model="inputs.startAmount" :min="0" :max="20000" :step="100" />
       </div>
       <div class="control-row">
         <label>Monthly top-up (USD)</label>
         <InputNumber v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
-        <Slider v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" />
       </div>
       <div class="control-row">
         <label>Target monthly income (after tax)</label>
         <InputNumber v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
-        <Slider v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" />
       </div>
       <div class="control-row">
         <label>Withholding tax</label>
         <InputNumber v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
-        <Slider v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" />
       </div>
 
       <!-- Results Cards -->
@@ -43,7 +38,7 @@
         <Card>
           <template #title>Net Monthly Dividend</template>
           <template #content>
-            <div class="card-value">${{ results.currentNetDiv?.toFixed(2) || '0.00' }}</div>
+            <div class="card-value">${{ results.currentNetDiv?.toFixed(2) || '--' }}</div>
           </template>
         </Card>
         <Card>
@@ -65,7 +60,7 @@
       <Message v-else-if="results.timeToGoalMonths > 120" severity="warn" :closable="false">Goal unlikely within 10 years</Message>
       <Message v-else severity="info" :closable="false">Goal in {{ results.timeToGoalMonths }} months</Message>
 
-      <ChartSection title="Projection" :chartData="chartData" />
+      <ChartSection title="Projection" :chartData="singleChartData" />
     </div>
 
     <!-- SPLIT TAB -->
@@ -73,34 +68,29 @@
       <div class="control-row">
         <label>Starting investment (USD)</label>
         <InputNumber v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
-        <Slider v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" />
       </div>
       <div class="control-row">
         <label>Monthly top-up (USD)</label>
         <InputNumber v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
-        <Slider v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" />
       </div>
       <div class="control-row">
         <label>JEPI allocation</label>
         <InputNumber v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" suffix="%" />
-        <Slider v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" />
       </div>
       <div class="control-row">
         <label>Target monthly income (after tax)</label>
         <InputNumber v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
-        <Slider v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" />
       </div>
       <div class="control-row">
         <label>Withholding tax</label>
         <InputNumber v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
-        <Slider v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" />
       </div>
 
       <div class="cards">
         <Card>
           <template #title>Net Monthly Dividend</template>
           <template #content>
-            <div class="card-value">${{ splitResults.currentNetDiv?.toFixed(2) || '0.00' }}</div>
+            <div class="card-value">${{ splitResults.currentNetDiv?.toFixed(2) || '--' }}</div>
           </template>
         </Card>
         <Card>
@@ -162,7 +152,6 @@ import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import Message from 'primevue/message'
 import InputNumber from 'primevue/inputnumber'
-import Slider from 'primevue/slider'
 
 const store = useCalculatorStore()
 const activeTab = ref('single')
@@ -171,6 +160,21 @@ const singleEtf = ref('JEPI')
 const inputs = computed(() => store.inputs)
 const results = computed(() => store.results)
 
+// Chart data for single ETF
+const singleChartData = computed(() => ({
+  labels: results.value.chartLabels || [],
+  datasets: [
+    {
+      label: 'Portfolio Value',
+      data: results.value.chartValues || [],
+      borderColor: '#378ADD',
+      backgroundColor: 'rgba(55,138,221,0.1)',
+      fill: true
+    }
+  ]
+}))
+
+// Split inputs
 const splitInputs = ref({
   startAmount: 2000,
   monthlyTopUp: 100,
@@ -179,6 +183,7 @@ const splitInputs = ref({
   splitAllocationRatio: 60
 })
 
+// Split results (local copy)
 const splitResults = ref({
   currentNetDiv: null,
   timeToGoalMonths: null,
@@ -186,17 +191,32 @@ const splitResults = ref({
   isGoalReached: false
 })
 
-const chartData = ref({ labels: [], datasets: [] })
-const splitChartData = ref({ labels: [], datasets: [] })
+// Split chart data
+const splitChartData = computed(() => ({
+  labels: results.value.chartLabels || [],
+  datasets: [
+    {
+      label: 'Portfolio Value (Split)',
+      data: results.value.chartValues || [],
+      borderColor: '#639922',
+      backgroundColor: 'rgba(99,153,34,0.1)',
+      fill: true
+    }
+  ]
+}))
 
-watch(singleEtf, (val) => {
-  store.setEtf(val)
-})
+// Set ETF and sync
+function setEtf(etf) {
+  singleEtf.value = etf
+  store.setEtf(etf)
+}
 
+// Watch inputs and recalc
 watch(inputs, () => {
   store.calculate()
 }, { deep: true })
 
+// Watch split inputs
 watch(splitInputs, (v) => {
   store.setEtf('SPLIT')
   store.inputs.startAmount = v.startAmount
@@ -205,12 +225,15 @@ watch(splitInputs, (v) => {
   store.inputs.withholdingTax = v.withholdingTax
   store.inputs.splitAllocationRatio = v.splitAllocationRatio
   store.calculate()
-  splitResults.value.currentNetDiv = store.results.currentNetDiv
-  splitResults.value.timeToGoalMonths = store.results.timeToGoalMonths
-  splitResults.value.portfolioValueAtGoal = store.results.portfolioValueAtGoal
-  splitResults.value.isGoalReached = store.results.isGoalReached
+  splitResults.value = {
+    currentNetDiv: store.results.currentNetDiv,
+    timeToGoalMonths: store.results.timeToGoalMonths,
+    portfolioValueAtGoal: store.results.portfolioValueAtGoal,
+    isGoalReached: store.results.isGoalReached
+  }
 }, { deep: true })
 
+// Initialize
 store.setEtf('JEPI')
 store.calculate()
 </script>
@@ -222,7 +245,6 @@ store.calculate()
 .etf-switcher { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
 .control-row { margin-bottom: 1.5rem; }
 .control-row label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; }
-.control-row .p-inputnumber, .control-row .p-slider { margin-bottom: 0.5rem; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
 .card-value { font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem; }
 .etf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
