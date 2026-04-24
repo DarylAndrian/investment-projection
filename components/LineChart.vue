@@ -6,7 +6,10 @@
 
 <script setup>
 import { ref, onMounted, watch, onUnmounted } from 'vue'
-import { Chart } from 'chart.js'
+import { Chart, CategoryScale, LinearScale, PointElement, LineElement, LineController, Tooltip, Legend } from 'chart.js'
+
+// Register required components
+Chart.register(CategoryScale, LinearScale, PointElement, LineElement, LineController, Tooltip, Legend)
 
 const props = defineProps({
   data: {
@@ -31,8 +34,14 @@ function render() {
         legend: { display: true, position: 'top' }
       },
       scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true, grid: { color: '#eee' } }
+        x: {
+          type: 'category',
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: '#eee' }
+        }
       }
     }
   })
