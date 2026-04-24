@@ -103,6 +103,7 @@ export const useCalculatorStore = defineStore('calculator', {
       let etfDetails = {};
       let chartLabels = [];
       let chartValues = [];
+      let chartDividends = [];
 
       if (this.selectedEtf === 'JEPI' || this.selectedEtf === 'SCHD') {
         const etf = ETF[this.selectedEtf];

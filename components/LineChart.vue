@@ -39,8 +39,19 @@ function render() {
           grid: { display: false }
         },
         y: {
-          beginAtZero: true,
+          type: 'linear',
+          display: true,
+          position: 'left',
+          title: { display: true, text: 'Portfolio Value ($)' },
           grid: { color: '#eee' }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          title: { display: true, text: 'Monthly Dividend ($)' },
+          grid: { drawOnChartArea: false },
+          ticks: { color: '#639922' }
         }
       }
     }
