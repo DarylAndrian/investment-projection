@@ -16,17 +16,51 @@
         <Button :class="{ 'p-button-outlined': singleEtf !== 'SCHD' }" label="SCHD" @click="singleEtf = 'SCHD'" />
       </div>
 
-      <Slider label="Starting investment (USD)" v-model="inputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
-      <Slider label="Monthly top-up (USD)" v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
-      <Slider label="Target monthly income (after tax)" v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
-      <Slider label="Withholding tax" v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
-
-      <div class="cards">
-        <MetricCard title="Net Monthly Dividend" :value="results.currentNetDiv" />
-        <MetricCard title="Months to Goal" :value="results.timeToGoalMonths" />
-        <MetricCard title="Portfolio at Goal" :value="results.portfolioValueAtGoal" />
+      <!-- Use PrimeVue InputNumber + Slider -->
+      <div class="control-row">
+        <label>Starting investment (USD)</label>
+        <InputNumber v-model="inputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
+        <Slider v-model="inputs.startAmount" :min="0" :max="20000" :step="100" />
+      </div>
+      <div class="control-row">
+        <label>Monthly top-up (USD)</label>
+        <InputNumber v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
+        <Slider v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" />
+      </div>
+      <div class="control-row">
+        <label>Target monthly income (after tax)</label>
+        <InputNumber v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
+        <Slider v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" />
+      </div>
+      <div class="control-row">
+        <label>Withholding tax</label>
+        <InputNumber v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
+        <Slider v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" />
       </div>
 
+      <!-- Results Cards -->
+      <div class="cards">
+        <Card>
+          <template #title>Net Monthly Dividend</template>
+          <template #content>
+            <div class="card-value">${{ results.currentNetDiv?.toFixed(2) || '0.00' }}</div>
+          </template>
+        </Card>
+        <Card>
+          <template #title>Months to Goal</template>
+          <template #content>
+            <div class="card-value">{{ results.timeToGoalMonths || '--' }}</div>
+          </template>
+        </Card>
+        <Card>
+          <template #title>Portfolio at Goal</template>
+          <template #content>
+            <div class="card-value">${{ results.portfolioValueAtGoal?.toLocaleString() || '--' }}</div>
+          </template>
+        </Card>
+      </div>
+
+      <!-- Goal Message -->
       <Message v-if="results.isGoalReached" severity="success" :closable="false">Goal reachable!</Message>
       <Message v-else-if="results.timeToGoalMonths > 120" severity="warn" :closable="false">Goal unlikely within 10 years</Message>
       <Message v-else severity="info" :closable="false">Goal in {{ results.timeToGoalMonths }} months</Message>
@@ -36,16 +70,51 @@
 
     <!-- SPLIT TAB -->
     <div v-if="activeTab === 'split'" class="tab-panel">
-      <Slider label="Starting investment (USD)" v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
-      <Slider label="Monthly top-up (USD)" v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
-      <Slider label="JEPI allocation" v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" suffix="%" />
-      <Slider label="Target monthly income (after tax)" v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
-      <Slider label="Withholding tax" v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
+      <div class="control-row">
+        <label>Starting investment (USD)</label>
+        <InputNumber v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
+        <Slider v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" />
+      </div>
+      <div class="control-row">
+        <label>Monthly top-up (USD)</label>
+        <InputNumber v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
+        <Slider v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" />
+      </div>
+      <div class="control-row">
+        <label>JEPI allocation</label>
+        <InputNumber v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" suffix="%" />
+        <Slider v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" />
+      </div>
+      <div class="control-row">
+        <label>Target monthly income (after tax)</label>
+        <InputNumber v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
+        <Slider v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" />
+      </div>
+      <div class="control-row">
+        <label>Withholding tax</label>
+        <InputNumber v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
+        <Slider v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" />
+      </div>
 
       <div class="cards">
-        <MetricCard title="Net Monthly Dividend" :value="splitResults.currentNetDiv" />
-        <MetricCard title="Months to Goal" :value="splitResults.timeToGoalMonths" />
-        <MetricCard title="Portfolio at Goal" :value="splitResults.portfolioValueAtGoal" />
+        <Card>
+          <template #title>Net Monthly Dividend</template>
+          <template #content>
+            <div class="card-value">${{ splitResults.currentNetDiv?.toFixed(2) || '0.00' }}</div>
+          </template>
+        </Card>
+        <Card>
+          <template #title>Months to Goal</template>
+          <template #content>
+            <div class="card-value">{{ splitResults.timeToGoalMonths || '--' }}</div>
+          </template>
+        </Card>
+        <Card>
+          <template #title>Portfolio at Goal</template>
+          <template #content>
+            <div class="card-value">${{ splitResults.portfolioValueAtGoal?.toLocaleString() || '--' }}</div>
+          </template>
+        </Card>
       </div>
 
       <Message v-if="splitResults.isGoalReached" severity="success" :closable="false">Goal reachable!</Message>
@@ -87,13 +156,13 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useCalculatorStore } from '@/stores/calculatorStore.js'
-import Slider from '@/components/Slider.vue'
-import MetricCard from '@/components/MetricCard.vue'
 import ChartSection from '@/components/ChartSection.vue'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import Message from 'primevue/message'
+import InputNumber from 'primevue/inputnumber'
+import Slider from 'primevue/slider'
 
 const store = useCalculatorStore()
 const activeTab = ref('single')
@@ -147,10 +216,15 @@ store.calculate()
 </script>
 
 <style>
+.app { max-width: 800px; margin: 0 auto; padding: 20px; }
 .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
 .tab-panel { margin-top: 1rem; }
 .etf-switcher { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.control-row { margin-bottom: 1.5rem; }
+.control-row label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; }
+.control-row .p-inputnumber, .control-row .p-slider { margin-bottom: 0.5rem; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.card-value { font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem; }
 .etf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .en { font-weight: 600; margin-bottom: 0.25rem; }
 .ed { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
