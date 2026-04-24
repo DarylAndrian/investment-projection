@@ -18,23 +18,31 @@
 
       <div class="control-row">
         <label>Starting investment (USD)</label>
-        <InputNumber v-model="inputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
-        <Slider v-model="inputs.startAmount" :min="0" :max="20000" :step="100" />
+        <div class="input-slider-row">
+          <InputNumber v-model="inputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
+          <Slider v-model="inputs.startAmount" :min="0" :max="20000" :step="100" class="slider" />
+        </div>
       </div>
       <div class="control-row">
         <label>Monthly top-up (USD)</label>
-        <InputNumber v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
-        <Slider v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" />
+        <div class="input-slider-row">
+          <InputNumber v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
+          <Slider v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" class="slider" />
+        </div>
       </div>
       <div class="control-row">
         <label>Target monthly income (after tax)</label>
-        <InputNumber v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
-        <Slider v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" />
+        <div class="input-slider-row">
+          <InputNumber v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
+          <Slider v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" class="slider" />
+        </div>
       </div>
       <div class="control-row">
         <label>Withholding tax</label>
-        <InputNumber v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
-        <Slider v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" />
+        <div class="input-slider-row">
+          <InputNumber v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
+          <Slider v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" class="slider" />
+        </div>
       </div>
 
       <!-- Results Cards -->
@@ -71,28 +79,38 @@
     <div v-if="activeTab === 'split'" class="tab-panel">
       <div class="control-row">
         <label>Starting investment (USD)</label>
-        <InputNumber v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
-        <Slider v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" />
+        <div class="input-slider-row">
+          <InputNumber v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
+          <Slider v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" class="slider" />
+        </div>
       </div>
       <div class="control-row">
         <label>Monthly top-up (USD)</label>
-        <InputNumber v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
-        <Slider v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" />
+        <div class="input-slider-row">
+          <InputNumber v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
+          <Slider v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" class="slider" />
+        </div>
       </div>
       <div class="control-row">
         <label>JEPI allocation</label>
-        <InputNumber v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" suffix="%" />
-        <Slider v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" />
+        <div class="input-slider-row">
+          <InputNumber v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" suffix="%" />
+          <Slider v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" class="slider" />
+        </div>
       </div>
       <div class="control-row">
         <label>Target monthly income (after tax)</label>
-        <InputNumber v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
-        <Slider v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" />
+        <div class="input-slider-row">
+          <InputNumber v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
+          <Slider v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" class="slider" />
+        </div>
       </div>
       <div class="control-row">
         <label>Withholding tax</label>
-        <InputNumber v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
-        <Slider v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" />
+        <div class="input-slider-row">
+          <InputNumber v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
+          <Slider v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" class="slider" />
+        </div>
       </div>
 
       <div class="cards">
@@ -262,6 +280,14 @@ store.calculate()
 .tabs button:hover { background: #e0e0e0; }
 .etf-switcher button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; font-size: 0.8rem; }
 .etf-switcher button.p-button-outlined { background: transparent; border-color: #999; }
+.control-row { margin-bottom: 1.5rem; }
+.control-row label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; }
+.input-slider-row { display: flex; align-items: center; gap: 1rem; }
+.input-slider-row .p-inputnumber { width: 200px; }
+.input-slider-row .slider { flex: 1; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.card-value { font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem; }
+.etf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .en { font-weight: 600; margin-bottom: 0.25rem; }
 .ed { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
 .es { display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid #eee; }
