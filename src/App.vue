@@ -72,6 +72,9 @@
       <Message v-else-if="results.timeToGoalMonths > 120" severity="warn" :closable="false">Goal unlikely within 10 years</Message>
       <Message v-else severity="info" :closable="false">Goal in {{ results.timeToGoalMonths }} months</Message>
 
+      <div class="chart-controls">
+        <Button :class="{ 'p-button-outlined': !showDividends }" :label="showDividends ? 'Hide Dividends' : 'Show Dividends'" @click="showDividends = !showDividends" />
+      </div>
       <ChartSection title="Projection" :chartData="singleChartData" />
     </div>
 
@@ -138,6 +141,9 @@
       <Message v-else-if="splitResults.timeToGoalMonths > 120" severity="warn" :closable="false">Goal unlikely within 10 years</Message>
       <Message v-else severity="info" :closable="false">Split goal in {{ splitResults.timeToGoalMonths }} months</Message>
 
+      <div class="chart-controls">
+        <Button :class="{ 'p-button-outlined': !showDividends }" :label="showDividends ? 'Hide Dividends' : 'Show Dividends'" @click="showDividends = !showDividends" />
+      </div>
       <ChartSection title="Split Projection" :chartData="splitChartData" />
     </div>
 
@@ -183,23 +189,53 @@ import InputNumber from 'primevue/inputnumber'
 const store = useCalculatorStore()
 const activeTab = ref('single')
 const singleEtf = ref('JEPI')
+const showDividends = ref(true)
 
 const inputs = computed(() => store.inputs)
 const results = computed(() => store.results)
 
 // Chart data for single ETF
-const singleChartData = computed(() => ({
-  labels: results.value.chartLabels || [],
-  datasets: [
+const singleChartData = computed(() => {
+  const datasets = [
     {
       label: 'Portfolio Value',
       data: results.value.chartValues || [],
       borderColor: '#378ADD',
       backgroundColor: 'rgba(55,138,221,0.1)',
-      fill: true
+      fill: true,
+      yAxisID: 'y'
     }
   ]
-}))
+  if (showDividends.value && results.value.chartDividends?.length) {
+    datasets.push({
+      label: 'Dividends',
+      data: results.value.chartDividends,
+      borderColor: '#FF9800',
+      backgroundColor: 'rgba(255,152,0,0.1)',
+      fill: false,
+      yAxisID: 'y1',
+      borderDash: [5, 5]
+    })
+  }
+  return {
+    labels: results.value.chartLabels || [],
+    datasets,
+    options: {
+      scales: {
+        y: {
+          title: { display: true, text: 'Portfolio Value ($)', color: '#378ADD' },
+          ticks: { color: '#378ADD' }
+        },
+        y1: {
+          position: 'right',
+          title: { display: true, text: 'Dividends ($)', color: '#FF9800' },
+          ticks: { color: '#FF9800' },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  }
+})
 
 // Split inputs
 const splitInputs = ref({
@@ -219,18 +255,47 @@ const splitResults = ref({
 })
 
 // Split chart data
-const splitChartData = computed(() => ({
-  labels: results.value.chartLabels || [],
-  datasets: [
+const splitChartData = computed(() => {
+  const datasets = [
     {
       label: 'Portfolio Value (Split)',
       data: results.value.chartValues || [],
       borderColor: '#639922',
       backgroundColor: 'rgba(99,153,34,0.1)',
-      fill: true
+      fill: true,
+      yAxisID: 'y'
     }
   ]
-}))
+  if (showDividends.value && results.value.chartDividends?.length) {
+    datasets.push({
+      label: 'Dividends (Split)',
+      data: results.value.chartDividends,
+      borderColor: '#FF5722',
+      backgroundColor: 'rgba(255,87,34,0.1)',
+      fill: false,
+      yAxisID: 'y1',
+      borderDash: [5, 5]
+    })
+  }
+  return {
+    labels: results.value.chartLabels || [],
+    datasets,
+    options: {
+      scales: {
+        y: {
+          title: { display: true, text: 'Portfolio Value ($)', color: '#639922' },
+          ticks: { color: '#639922' }
+        },
+        y1: {
+          position: 'right',
+          title: { display: true, text: 'Dividends ($)', color: '#FF5722' },
+          ticks: { color: '#FF5722' },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  }
+})
 
 // Set ETF and sync
 function setEtf(etf) {
@@ -288,6 +353,7 @@ store.calculate()
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
 .card-value { font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem; }
 .etf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.chart-controls { margin: 1rem 0; }
 .en { font-weight: 600; margin-bottom: 0.25rem; }
 .ed { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
 .es { display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid #eee; }
