@@ -2,17 +2,26 @@
   <div class="chart-section">
     <h3>{{ title }}</h3>
     <div class="chart-container">
-      <LineChart :data="chartData" />
+      <LineChart v-if="hasData" :data="chartData" />
+      <div v-else class="empty-chart">
+        <i class="pi pi-chart-line"></i>
+        <p>No data yet. Adjust inputs to see projection.</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import LineChart from './LineChart.vue'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
   title: { type: String, default: 'Projection' },
   chartData: { type: Object, default: () => ({ labels: [], datasets: [] }) }
+})
+
+const hasData = computed(() => {
+  return props.chartData?.labels?.length > 0 && props.chartData?.datasets?.length > 0
 })
 </script>
 

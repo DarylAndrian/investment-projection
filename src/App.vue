@@ -1,5 +1,16 @@
 <template>
-  <div class="app">
+  <div :class="['app', { dark: isDark }]">
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+      <Button 
+        :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'" 
+        @click="toggleTheme" 
+        class="p-button-rounded p-button-text" 
+        :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+      />
+    </div>
+
+    <h1>📊 JEPI & SCHD Dividend Calculator</h1>
     <h1>JEPI & SCHD Dividend Calculator</h1>
 
     <!-- Tabs -->
@@ -177,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useCalculatorStore } from '@/stores/calculatorStore.js'
 import ChartSection from '@/components/ChartSection.vue'
 import Button from 'primevue/button'
@@ -190,6 +201,33 @@ const store = useCalculatorStore()
 const activeTab = ref('single')
 const singleEtf = ref('JEPI')
 const showDividends = ref(true)
+const isDark = ref(false)
+
+// Theme toggle
+function toggleTheme() {
+  isDark.value = !isDark.value
+  applyTheme()
+}
+
+function applyTheme() {
+  if (isDark.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+  localStorage.setItem('investment-theme', isDark.value ? 'dark' : 'light')
+}
+
+// Initialize theme
+onMounted(() => {
+  const saved = localStorage.getItem('investment-theme')
+  if (saved) {
+    isDark.value = saved === 'dark'
+  } else {
+    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+  }
+  applyTheme()
+})
 
 const inputs = computed(() => store.inputs)
 const results = computed(() => store.results)
@@ -331,32 +369,5 @@ store.calculate()
 </script>
 
 <style>
-.app { max-width: 800px; margin: 0 auto; padding: 20px; }
-.tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-.tab-panel { margin-top: 1rem; }
-.etf-switcher { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-.control-row { margin-bottom: 1.5rem; }
-.control-row label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
-.card-value { font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem; }
-.etf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.tabs button { padding: 8px 16px; border-radius: 6px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; font-size: 0.85rem; }
-.tabs button.p-button-outlined { background: transparent; border-color: #999; }
-.tabs button:hover { background: #e0e0e0; }
-.etf-switcher button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; font-size: 0.8rem; }
-.etf-switcher button.p-button-outlined { background: transparent; border-color: #999; }
-.control-row { margin-bottom: 1.5rem; }
-.control-row label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; }
-.input-slider-row { display: flex; align-items: center; gap: 1rem; }
-.input-slider-row .p-inputnumber { width: 200px; }
-.input-slider-row .slider { flex: 1; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
-.card-value { font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem; }
-.etf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.chart-controls { margin: 1rem 0; }
-.en { font-weight: 600; margin-bottom: 0.25rem; }
-.ed { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
-.es { display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid #eee; }
-.ek { color: #666; }
-.ev { font-weight: 500; }
+/* Styles moved to src/assets/styles.css */
 </style>
