@@ -1,6 +1,6 @@
 <template>
   <div :class="['app', { dark: isDark }]">
-    <ThemeToggle class="app-theme-toggle" />
+    <ThemeToggle class="app-theme-toggle" :isDark="isDark" @toggle="toggleTheme" />
 
     <header class="app-header">
       <h1 class="app-title">

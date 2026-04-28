@@ -1,7 +1,7 @@
 <template>
   <div :class="['theme-toggle', { active: isDark }]">
     <Button
-      @click="toggleTheme"
+      @click="$emit('toggle')"
       v-bind="$attrs"
       :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
     >
@@ -14,34 +14,11 @@
 import { ref, onMounted } from 'vue'
 import Button from 'primevue/button'
 
-const isDark = ref(false)
-
-function toggleTheme() {
-  isDark.value = !isDark.value
-  applyTheme()
-}
-
-function applyTheme() {
-  const root = document.documentElement
-  if (isDark.value) {
-    root.classList.add('dark')
-  } else {
-    root.classList.remove('dark')
-  }
-  localStorage.setItem('investment-theme', isDark.value ? 'dark' : 'light')
-}
-
-onMounted(() => {
-  const saved = localStorage.getItem('investment-theme')
-  if (saved) {
-    isDark.value = saved === 'dark'
-  } else {
-    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
-  }
-  applyTheme()
+const props = defineProps({
+  isDark: { type: Boolean, default: false }
 })
 
-defineExpose({ isDark, toggleTheme })
+defineEmits(['toggle'])
 </script>
 
 <style scoped>
