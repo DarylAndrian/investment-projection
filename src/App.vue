@@ -29,10 +29,10 @@
     <section v-if="activeTab === 'single'" class="tab-panel" role="tabpanel">
       <EtfSwitcher v-model="singleEtf" class="mb-4" />
 
-      <InputSliderRow v-model="inputs.startAmount" label="Starting investment (USD)" :min="0" :max="20000" :step="100" prefix="$" />
-      <InputSliderRow v-model="inputs.monthlyTopUp" label="Monthly top-up (USD)" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
-      <InputSliderRow v-model="inputs.targetMonthlyIncome" label="Target monthly income (after tax)" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
-      <InputSliderRow v-model="inputs.withholdingTax" label="Withholding tax" :min="0" :max="30" :step="5" suffix="%" />
+      <InputSliderRow v-model="inputs.startAmount" label="Starting investment (USD)" :min="0" :max="20000" :step="100" prefix="$" tooltip="Initial lump sum to invest" />
+      <InputSliderRow v-model="inputs.monthlyTopUp" label="Monthly top-up (USD)" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" tooltip="Regular monthly contribution" />
+      <InputSliderRow v-model="inputs.targetMonthlyIncome" label="Target monthly income (after tax)" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" tooltip="Your desired monthly dividend income" />
+      <InputSliderRow v-model="inputs.withholdingTax" label="Withholding tax" :min="0" :max="30" :step="5" suffix="%" tooltip="Tax rate applied to dividends (e.g. 30% for non-US residents)" />
 
       <!-- Results -->
       <div class="cards">

@@ -1,6 +1,9 @@
 <template>
   <div class="control-row" :class="{ disabled }">
-    <label :for="`input-${label}`" class="control-label">{{ label }}</label>
+    <div class="label-row">
+      <label :for="`input-${label}`" class="control-label">{{ label }}</label>
+      <i v-if="tooltip" class="fas fa-circle-question tooltip-icon" :title="tooltip" />
+    </div>
     <div class="input-slider-row">
       <InputNumber
         :id="`input-${label}`"
@@ -37,7 +40,8 @@ defineProps({
   step: { type: Number, default: 1 },
   prefix: { type: String, default: '' },
   suffix: { type: String, default: '' },
-  disabled: { type: Boolean, default: false }
+  disabled: { type: Boolean, default: false },
+  tooltip: { type: String, default: '' }
 })
 
 defineEmits(['update:modelValue'])
@@ -58,12 +62,21 @@ defineEmits(['update:modelValue'])
   box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
-.control-label {
-  display: block;
-  font-weight: var(--font-semibold);
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
   margin-bottom: var(--sp-3);
+}
+.control-label {
+  font-weight: var(--font-semibold);
   color: var(--text-primary);
   font-size: var(--text-sm);
+}
+.tooltip-icon {
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+  cursor: help;
 }
 .input-slider-row {
   display: flex;

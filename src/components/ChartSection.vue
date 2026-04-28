@@ -5,13 +5,17 @@
       <slot name="controls" />
     </div>
     <div class="chart-container">
-      <div v-if="loading" class="loading-overlay">
-        <i v-if="loading" class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--brand-500)" />
+      <!-- Loading Skeleton -->
+      <div v-if="loading" class="chart-skeleton">
+        <div class="skeleton-line" v-for="n in 5" :key="n" :style="{ width: `${Math.random() * 40 + 60}%` }" />
       </div>
+      <!-- Empty State -->
       <div v-else-if="empty" class="empty-chart">
         <i class="fas fa-chart-line" />
         <span>No projection data yet</span>
+        <p class="empty-hint">Adjust your inputs to see the projection</p>
       </div>
+      <!-- Chart -->
       <slot v-else />
     </div>
   </div>
@@ -51,18 +55,38 @@ defineProps({
 .chart-container:hover {
   box-shadow: var(--shadow-md);
 }
-.loading-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.8);
+.chart-skeleton {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-lg);
-  z-index: 10;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
 }
-:deep(.dark) .loading-overlay {
-  background: rgba(15, 23, 42, 0.8);
+.skeleton-line {
+  height: 12px;
+  background: linear-gradient(
+    90deg,
+    var(--gray-200) 25%,
+    var(--gray-100) 50%,
+    var(--gray-200) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+:deep(.dark) .skeleton-line {
+  background: linear-gradient(
+    90deg,
+    var(--gray-700) 25%,
+    var(--gray-600) 50%,
+    var(--gray-700) 75%
+  );
+  background-size: 200% 100%;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 .empty-chart {
   display: flex;
@@ -77,5 +101,10 @@ defineProps({
 .empty-chart i {
   font-size: 2rem;
   opacity: 0.4;
+}
+.empty-hint {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+  margin-top: var(--sp-1);
 }
 </style>
