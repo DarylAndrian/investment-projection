@@ -42,6 +42,12 @@ function formatCurrency(value) {
   })
 }
 
+// Check if dark mode is active
+function isDarkMode() {
+  if (typeof document === 'undefined') return false
+  return document.documentElement.classList.contains('dark')
+}
+
 const props = defineProps({
   chartData: { type: Object, required: true },
   options: { type: Object, default: () => ({}) },
@@ -61,6 +67,7 @@ async function createChart() {
   const textPrimary = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()
   const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
   const borderLight = getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim()
+  const darkMode = isDarkMode()
 
   chartInstance = new ChartClass(ctx, {
     type: 'line',
@@ -80,7 +87,7 @@ async function createChart() {
           }
         },
         tooltip: {
-          backgroundColor: 'rgba(0,0,0,0.8)',
+          backgroundColor: darkMode ? 'rgba(30,41,59,0.9)' : 'rgba(0,0,0,0.8)',
           titleFont: { size: 13 },
           bodyFont: { size: 12 },
           padding: 10,
