@@ -1,207 +1,258 @@
 <template>
   <div :class="['app', { dark: isDark }]">
-    <!-- Theme Toggle -->
-    <div class="theme-toggle">
-      <Button 
-        :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'" 
-        @click="toggleTheme" 
-        class="p-button-rounded p-button-text" 
-        :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+    <ThemeToggle class="app-theme-toggle" />
+
+    <header class="app-header">
+      <h1 class="app-title">
+        <span class="app-icon"><i class="fas fa-coins"></i></span>
+        Dividend Yield Planner
+      </h1>
+      <p class="app-subtitle">JEPI & SCHD projection calculator</p>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tabs" role="tablist" aria-label="Calculator views">
+      <Button
+        v-for="tab in tabs"
+        :key="tab.value"
+        :label="tab.label"
+        :severity="activeTab === tab.value ? undefined : 'secondary'"
+        :outlined="activeTab !== tab.value"
+        @click="activeTab = tab.value"
+        role="tab"
+        :aria-selected="activeTab === tab.value"
+        class="tab-button"
       />
-    </div>
+    </nav>
 
-    <h1>📊 JEPI & SCHD Dividend Calculator</h1>
-    <h1>JEPI & SCHD Dividend Calculator</h1>
+    <!-- Single ETF Tab -->
+    <section v-if="activeTab === 'single'" class="tab-panel" role="tabpanel">
+      <EtfSwitcher v-model="singleEtf" class="mb-4" />
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <Button :class="{ 'p-button-outlined': activeTab !== 'single' }" label="Single ETF" @click="activeTab = 'single'" />
-      <Button :class="{ 'p-button-outlined': activeTab !== 'split' }" label="JEPI + SCHD Split" @click="activeTab = 'split'" />
-      <Button :class="{ 'p-button-outlined': activeTab !== 'compare' }" label="Compare" @click="activeTab = 'compare'" />
-    </div>
+      <InputSliderRow v-model="inputs.startAmount" label="Starting investment (USD)" :min="0" :max="20000" :step="100" prefix="$" />
+      <InputSliderRow v-model="inputs.monthlyTopUp" label="Monthly top-up (USD)" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
+      <InputSliderRow v-model="inputs.targetMonthlyIncome" label="Target monthly income (after tax)" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
+      <InputSliderRow v-model="inputs.withholdingTax" label="Withholding tax" :min="0" :max="30" :step="5" suffix="%" />
 
-    <!-- SINGLE ETF TAB -->
-    <div v-if="activeTab === 'single'" class="tab-panel">
-      <div class="etf-switcher">
-        <Button :class="{ 'p-button-outlined': singleEtf !== 'JEPI' }" label="JEPI" @click="setEtf('JEPI')" />
-        <Button :class="{ 'p-button-outlined': singleEtf !== 'SCHD' }" label="SCHD" @click="setEtf('SCHD')" />
-      </div>
-
-      <div class="control-row">
-        <label>Starting investment (USD)</label>
-        <div class="input-slider-row">
-          <InputNumber v-model="inputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
-          <Slider v-model="inputs.startAmount" :min="0" :max="20000" :step="100" class="slider" />
-        </div>
-      </div>
-      <div class="control-row">
-        <label>Monthly top-up (USD)</label>
-        <div class="input-slider-row">
-          <InputNumber v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
-          <Slider v-model="inputs.monthlyTopUp" :min="0" :max="1000" :step="10" class="slider" />
-        </div>
-      </div>
-      <div class="control-row">
-        <label>Target monthly income (after tax)</label>
-        <div class="input-slider-row">
-          <InputNumber v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
-          <Slider v-model="inputs.targetMonthlyIncome" :min="5" :max="200" :step="5" class="slider" />
-        </div>
-      </div>
-      <div class="control-row">
-        <label>Withholding tax</label>
-        <div class="input-slider-row">
-          <InputNumber v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
-          <Slider v-model="inputs.withholdingTax" :min="0" :max="30" :step="5" class="slider" />
-        </div>
-      </div>
-
-      <!-- Results Cards -->
+      <!-- Results -->
       <div class="cards">
-        <Card>
-          <template #title>Net Monthly Dividend</template>
-          <template #content>
-            <div class="card-value">${{ results.currentNetDiv?.toFixed(2) || '--' }}</div>
-          </template>
-        </Card>
-        <Card>
-          <template #title>Months to Goal</template>
-          <template #content>
-            <div class="card-value">{{ results.timeToGoalMonths || '--' }}</div>
-          </template>
-        </Card>
-        <Card>
-          <template #title>Portfolio at Goal</template>
-          <template #content>
-            <div class="card-value">${{ results.portfolioValueAtGoal?.toLocaleString() || '--' }}</div>
-          </template>
-        </Card>
+        <MetricCard title="Net Monthly Dividend" :value="results.currentNetDiv" prefix="$" decimals="2" severity="primary" />
+        <MetricCard title="Months to Goal" :value="results.timeToGoalMonths" suffix="mo" severity="info" />
+        <MetricCard title="Portfolio at Goal" :value="results.portfolioValueAtGoal" prefix="$" severity="success" />
       </div>
 
-      <!-- Goal Message -->
+      <!-- Goal Messages -->
       <Message v-if="results.isGoalReached" severity="success" :closable="false">Goal reachable!</Message>
       <Message v-else-if="results.timeToGoalMonths > 120" severity="warn" :closable="false">Goal unlikely within 10 years</Message>
       <Message v-else severity="info" :closable="false">Goal in {{ results.timeToGoalMonths }} months</Message>
 
-      <div class="chart-controls">
-        <Button :class="{ 'p-button-outlined': !showDividends }" :label="showDividends ? 'Hide Dividends' : 'Show Dividends'" @click="showDividends = !showDividends" />
-      </div>
-      <ChartSection title="Projection" :chartData="singleChartData" />
-    </div>
+      <!-- Chart -->
+      <ChartSection title="Projection" :empty="!results.chartValues?.length">
+        <template #controls>
+          <Button
+            :label="showDividends ? 'Hide Dividends' : 'Show Dividends'"
+            :outlined="!showDividends"
+            size="small"
+            @click="showDividends = !showDividends"
+          />
+        </template>
+        <ChartVisualization :chartData="singleChartData" :options="singleChartOptions" />
+      </ChartSection>
+    </section>
 
-    <!-- SPLIT TAB -->
-    <div v-if="activeTab === 'split'" class="tab-panel">
-      <div class="control-row">
-        <label>Starting investment (USD)</label>
-        <div class="input-slider-row">
-          <InputNumber v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" prefix="$" />
-          <Slider v-model="splitInputs.startAmount" :min="0" :max="20000" :step="100" class="slider" />
-        </div>
-      </div>
-      <div class="control-row">
-        <label>Monthly top-up (USD)</label>
-        <div class="input-slider-row">
-          <InputNumber v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
-          <Slider v-model="splitInputs.monthlyTopUp" :min="0" :max="1000" :step="10" class="slider" />
-        </div>
-      </div>
-      <div class="control-row">
-        <label>JEPI allocation</label>
-        <div class="input-slider-row">
-          <InputNumber v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" suffix="%" />
-          <Slider v-model="splitInputs.splitAllocationRatio" :min="10" :max="90" :step="5" class="slider" />
-        </div>
-      </div>
-      <div class="control-row">
-        <label>Target monthly income (after tax)</label>
-        <div class="input-slider-row">
-          <InputNumber v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
-          <Slider v-model="splitInputs.targetMonthlyIncome" :min="5" :max="200" :step="5" class="slider" />
-        </div>
-      </div>
-      <div class="control-row">
-        <label>Withholding tax</label>
-        <div class="input-slider-row">
-          <InputNumber v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" suffix="%" />
-          <Slider v-model="splitInputs.withholdingTax" :min="0" :max="30" :step="5" class="slider" />
-        </div>
-      </div>
+    <!-- Split Tab -->
+    <section v-if="activeTab === 'split'" class="tab-panel" role="tabpanel">
+      <InputSliderRow v-model="splitInputs.startAmount" label="Starting investment (USD)" :min="0" :max="20000" :step="100" prefix="$" />
+      <InputSliderRow v-model="splitInputs.monthlyTopUp" label="Monthly top-up (USD)" :min="0" :max="1000" :step="10" prefix="$" suffix="/mo" />
+      <InputSliderRow v-model="splitInputs.splitAllocationRatio" label="JEPI allocation" :min="10" :max="90" :step="5" suffix="%" />
+      <InputSliderRow v-model="splitInputs.targetMonthlyIncome" label="Target monthly income (after tax)" :min="5" :max="200" :step="5" prefix="$" suffix="/mo" />
+      <InputSliderRow v-model="splitInputs.withholdingTax" label="Withholding tax" :min="0" :max="30" :step="5" suffix="%" />
 
       <div class="cards">
-        <Card>
-          <template #title>Net Monthly Dividend</template>
-          <template #content>
-            <div class="card-value">${{ splitResults.currentNetDiv?.toFixed(2) || '--' }}</div>
-          </template>
-        </Card>
-        <Card>
-          <template #title>Months to Goal</template>
-          <template #content>
-            <div class="card-value">{{ splitResults.timeToGoalMonths || '--' }}</div>
-          </template>
-        </Card>
-        <Card>
-          <template #title>Portfolio at Goal</template>
-          <template #content>
-            <div class="card-value">${{ splitResults.portfolioValueAtGoal?.toLocaleString() || '--' }}</div>
-          </template>
-        </Card>
+        <MetricCard title="Net Monthly Dividend (Split)" :value="splitResults.currentNetDiv" prefix="$" decimals="2" severity="primary" />
+        <MetricCard title="Months to Goal" :value="splitResults.timeToGoalMonths" suffix="mo" severity="info" />
+        <MetricCard title="Portfolio at Goal" :value="splitResults.portfolioValueAtGoal" prefix="$" severity="success" />
       </div>
 
       <Message v-if="splitResults.isGoalReached" severity="success" :closable="false">Goal reachable!</Message>
       <Message v-else-if="splitResults.timeToGoalMonths > 120" severity="warn" :closable="false">Goal unlikely within 10 years</Message>
       <Message v-else severity="info" :closable="false">Split goal in {{ splitResults.timeToGoalMonths }} months</Message>
 
-      <div class="chart-controls">
-        <Button :class="{ 'p-button-outlined': !showDividends }" :label="showDividends ? 'Hide Dividends' : 'Show Dividends'" @click="showDividends = !showDividends" />
-      </div>
-      <ChartSection title="Split Projection" :chartData="splitChartData" />
-    </div>
+      <ChartSection title="Split Projection" :empty="!results.chartValues?.length">
+        <template #controls>
+          <Button
+            :label="showDividends ? 'Hide Dividends' : 'Show Dividends'"
+            :outlined="!showDividends"
+            size="small"
+            @click="showDividends = !showDividends"
+          />
+        </template>
+        <ChartVisualization :chartData="splitChartData" :options="splitChartOptions" />
+      </ChartSection>
+    </section>
 
-    <!-- COMPARE TAB -->
-    <div v-if="activeTab === 'compare'" class="tab-panel">
-      <p style="color:#666;margin-bottom:12px">Compare JEPI vs SCHD side by side.</p>
+    <!-- Compare Tab -->
+    <section v-if="activeTab === 'compare'" class="tab-panel" role="tabpanel">
+      <p class="compare-hint">Compare JEPI vs SCHD side by side.</p>
       <div class="etf-grid">
-        <Card>
+        <Card class="etf-card">
           <template #title><Tag value="JEPI" severity="info" /></template>
           <template #content>
-            <div class="en">JPMorgan Equity Premium Income ETF</div>
-            <div class="ed">High yield, monthly payouts</div>
-            <div class="es"><span class="ek">Yield</span><span class="ev">8.26%</span></div>
-            <div class="es"><span class="ek">Growth (est)</span><span class="ev">2.0%</span></div>
-            <div class="es"><span class="ek">Expense Ratio</span><span class="ev">0.35%</span></div>
+            <div class="etf-name">JPMorgan Equity Premium Income ETF</div>
+            <div class="etf-desc">High yield, monthly payouts</div>
+            <div class="etf-stat"><span class="etf-stat-label">Yield</span><span class="etf-stat-value">8.26%</span></div>
+            <div class="etf-stat"><span class="etf-stat-label">Growth (est)</span><span class="etf-stat-value">2.0%</span></div>
+            <div class="etf-stat"><span class="etf-stat-label">Expense Ratio</span><span class="etf-stat-value">0.35%</span></div>
           </template>
         </Card>
-        <Card>
+        <Card class="etf-card">
           <template #title><Tag value="SCHD" severity="success" /></template>
           <template #content>
-            <div class="en">Schwab US Dividend Equity ETF</div>
-            <div class="ed">Dividend growth focus</div>
-            <div class="es"><span class="ek">Yield</span><span class="ev">3.35%</span></div>
-            <div class="es"><span class="ek">Growth (est)</span><span class="ev">7.0%</span></div>
-            <div class="es"><span class="ek">Expense Ratio</span><span class="ev">0.06%</span></div>
+            <div class="etf-name">Schwab US Dividend Equity ETF</div>
+            <div class="etf-desc">Dividend growth focus</div>
+            <div class="etf-stat"><span class="etf-stat-label">Yield</span><span class="etf-stat-value">3.35%</span></div>
+            <div class="etf-stat"><span class="etf-stat-label">Growth (est)</span><span class="etf-stat-value">7.0%</span></div>
+            <div class="etf-stat"><span class="etf-stat-label">Expense Ratio</span><span class="etf-stat-value">0.06%</span></div>
           </template>
         </Card>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useCalculatorStore } from '@/stores/calculatorStore.js'
-import ChartSection from '@/components/ChartSection.vue'
+import { useCalculatorStore } from '../stores/calculatorStore.js'
+import ThemeToggle from './components/ThemeToggle.vue'
+import EtfSwitcher from './components/EtfSwitcher.vue'
+import InputSliderRow from './components/InputSliderRow.vue'
+import MetricCard from './components/MetricCard.vue'
+import ChartSection from './components/ChartSection.vue'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import Message from 'primevue/message'
-import InputNumber from 'primevue/inputnumber'
+import ChartVisualization from './components/ChartVisualization.vue'
 
 const store = useCalculatorStore()
 const activeTab = ref('single')
 const singleEtf = ref('JEPI')
 const showDividends = ref(true)
 const isDark = ref(false)
+
+// Tab config
+const tabs = [
+  { value: 'single', label: 'Single ETF' },
+  { value: 'split', label: 'JEPI + SCHD Split' },
+  { value: 'compare', label: 'Compare' }
+]
+
+// Computed
+const inputs = computed(() => store.inputs)
+const results = computed(() => store.results)
+
+// Split inputs (local)
+const splitInputs = ref({
+  startAmount: 2000,
+  monthlyTopUp: 100,
+  splitAllocationRatio: 60,
+  targetMonthlyIncome: 30,
+  withholdingTax: 30
+})
+
+// Chart data for single ETF
+const singleChartData = computed(() => {
+  const datasets = [
+    {
+      label: 'Portfolio Value',
+      data: results.value.chartValues || [],
+      borderColor: '#E8630A',
+      backgroundColor: 'rgba(232, 99, 10, 0.1)',
+      fill: true,
+      yAxisID: 'y',
+      tension: 0.3
+    }
+  ]
+  if (showDividends.value && results.value.chartDividends?.length) {
+    datasets.push({
+      label: 'Dividends',
+      data: results.value.chartDividends,
+      borderColor: '#F5A623',
+      backgroundColor: 'rgba(245, 166, 35, 0.05)',
+      fill: false,
+      yAxisID: 'y1',
+      borderDash: [5, 5],
+      tension: 0.3
+    })
+  }
+  return {
+    labels: results.value.chartLabels || [],
+    datasets
+  }
+})
+
+const singleChartOptions = computed(() => ({
+  scales: {
+    y: {
+      title: { display: true, text: 'Portfolio Value ($)', font: { size: 12 } },
+      ticks: { color: '#E8630A', font: { size: 11 } },
+      grid: { color: 'rgba(0,0,0,0.05)' }
+    },
+    y1: {
+      position: 'right',
+      title: { display: true, text: 'Dividends ($)', font: { size: 12 } },
+      ticks: { color: '#F5A623', font: { size: 11 } },
+      grid: { drawOnChartArea: false }
+    }
+  }
+}))
+
+// Split chart data
+const splitChartData = computed(() => {
+  const datasets = [
+    {
+      label: 'Portfolio Value (Split)',
+      data: results.value.chartValues || [],
+      borderColor: '#2E8B57',
+      backgroundColor: 'rgba(46, 139, 87, 0.1)',
+      fill: true,
+      yAxisID: 'y',
+      tension: 0.3
+    }
+  ]
+  if (showDividends.value && results.value.chartDividends?.length) {
+    datasets.push({
+      label: 'Dividends (Split)',
+      data: results.value.chartDividends,
+      borderColor: '#1CA8C4',
+      backgroundColor: 'rgba(28, 168, 196, 0.05)',
+      fill: false,
+      yAxisID: 'y1',
+      borderDash: [5, 5],
+      tension: 0.3
+    })
+  }
+  return {
+    labels: results.value.chartLabels || [],
+    datasets
+  }
+})
+
+const splitChartOptions = computed(() => ({
+  scales: {
+    y: {
+      title: { display: true, text: 'Portfolio Value ($)', font: { size: 12 } },
+      ticks: { color: '#2E8B57', font: { size: 11 } },
+      grid: { color: 'rgba(0,0,0,0.05)' }
+    },
+    y1: {
+      position: 'right',
+      title: { display: true, text: 'Dividends ($)', font: { size: 12 } },
+      ticks: { color: '#1CA8C4', font: { size: 11 } },
+      grid: { drawOnChartArea: false }
+    }
+  }
+}))
 
 // Theme toggle
 function toggleTheme() {
@@ -210,15 +261,15 @@ function toggleTheme() {
 }
 
 function applyTheme() {
+  const root = document.documentElement
   if (isDark.value) {
-    document.documentElement.classList.add('dark')
+    root.classList.add('dark')
   } else {
-    document.documentElement.classList.remove('dark')
+    root.classList.remove('dark')
   }
   localStorage.setItem('investment-theme', isDark.value ? 'dark' : 'light')
 }
 
-// Initialize theme
 onMounted(() => {
   const saved = localStorage.getItem('investment-theme')
   if (saved) {
@@ -227,124 +278,13 @@ onMounted(() => {
     isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
   }
   applyTheme()
-})
-
-const inputs = computed(() => store.inputs)
-const results = computed(() => store.results)
-
-// Chart data for single ETF
-const singleChartData = computed(() => {
-  const datasets = [
-    {
-      label: 'Portfolio Value',
-      data: results.value.chartValues || [],
-      borderColor: '#378ADD',
-      backgroundColor: 'rgba(55,138,221,0.1)',
-      fill: true,
-      yAxisID: 'y'
-    }
-  ]
-  if (showDividends.value && results.value.chartDividends?.length) {
-    datasets.push({
-      label: 'Dividends',
-      data: results.value.chartDividends,
-      borderColor: '#FF9800',
-      backgroundColor: 'rgba(255,152,0,0.1)',
-      fill: false,
-      yAxisID: 'y1',
-      borderDash: [5, 5]
-    })
-  }
-  return {
-    labels: results.value.chartLabels || [],
-    datasets,
-    options: {
-      scales: {
-        y: {
-          title: { display: true, text: 'Portfolio Value ($)', color: '#378ADD' },
-          ticks: { color: '#378ADD' }
-        },
-        y1: {
-          position: 'right',
-          title: { display: true, text: 'Dividends ($)', color: '#FF9800' },
-          ticks: { color: '#FF9800' },
-          grid: { drawOnChartArea: false }
-        }
-      }
-    }
-  }
-})
-
-// Split inputs
-const splitInputs = ref({
-  startAmount: 2000,
-  monthlyTopUp: 100,
-  targetMonthlyIncome: 30,
-  withholdingTax: 30,
-  splitAllocationRatio: 60
-})
-
-// Split results (local copy)
-const splitResults = ref({
-  currentNetDiv: null,
-  timeToGoalMonths: null,
-  portfolioValueAtGoal: null,
-  isGoalReached: false
-})
-
-// Split chart data
-const splitChartData = computed(() => {
-  const datasets = [
-    {
-      label: 'Portfolio Value (Split)',
-      data: results.value.chartValues || [],
-      borderColor: '#639922',
-      backgroundColor: 'rgba(99,153,34,0.1)',
-      fill: true,
-      yAxisID: 'y'
-    }
-  ]
-  if (showDividends.value && results.value.chartDividends?.length) {
-    datasets.push({
-      label: 'Dividends (Split)',
-      data: results.value.chartDividends,
-      borderColor: '#FF5722',
-      backgroundColor: 'rgba(255,87,34,0.1)',
-      fill: false,
-      yAxisID: 'y1',
-      borderDash: [5, 5]
-    })
-  }
-  return {
-    labels: results.value.chartLabels || [],
-    datasets,
-    options: {
-      scales: {
-        y: {
-          title: { display: true, text: 'Portfolio Value ($)', color: '#639922' },
-          ticks: { color: '#639922' }
-        },
-        y1: {
-          position: 'right',
-          title: { display: true, text: 'Dividends ($)', color: '#FF5722' },
-          ticks: { color: '#FF5722' },
-          grid: { drawOnChartArea: false }
-        }
-      }
-    }
-  }
-})
-
-// Set ETF and sync
-function setEtf(etf) {
-  singleEtf.value = etf
-  store.setEtf(etf)
-}
-
-// Watch inputs and recalc
-watch(inputs, () => {
+  store.setEtf('JEPI')
   store.calculate()
-}, { deep: true })
+})
+
+// Watch single ETF
+watch(singleEtf, (val) => store.setEtf(val))
+watch(inputs, () => store.calculate(), { deep: true })
 
 // Watch split inputs
 watch(splitInputs, (v) => {
@@ -355,19 +295,132 @@ watch(splitInputs, (v) => {
   store.inputs.withholdingTax = v.withholdingTax
   store.inputs.splitAllocationRatio = v.splitAllocationRatio
   store.calculate()
-  splitResults.value = {
-    currentNetDiv: store.results.currentNetDiv,
-    timeToGoalMonths: store.results.timeToGoalMonths,
-    portfolioValueAtGoal: store.results.portfolioValueAtGoal,
-    isGoalReached: store.results.isGoalReached
-  }
 }, { deep: true })
-
-// Initialize
-store.setEtf('JEPI')
-store.calculate()
 </script>
 
-<style>
-/* Styles moved to src/assets/styles.css */
+<style scoped>
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--sp-4);
+  min-height: 100vh;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  transition: background var(--duration-normal) var(--ease-in-out),
+              color var(--duration-normal) var(--ease-in-out);
+}
+.app-header {
+  margin-bottom: var(--sp-6);
+}
+.app-title {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--sp-1);
+}
+.app-icon {
+  font-size: 1.5em;
+}
+.app-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+.app-theme-toggle {
+  position: fixed;
+  top: var(--sp-4);
+  right: var(--sp-4);
+  z-index: var(--z-sticky);
+}
+.tabs {
+  display: flex;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-6);
+  padding: var(--sp-1);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xs);
+}
+.tab-button {
+  flex: 1;
+  border-radius: var(--radius-md) !important;
+  font-size: var(--text-sm);
+}
+.tab-panel {
+  animation: fadeIn var(--duration-normal) var(--ease-in-out);
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--sp-4);
+  margin: var(--sp-5) 0;
+}
+.etf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+}
+.etf-card {
+  border-radius: var(--radius-lg) !important;
+}
+.etf-name {
+  font-weight: var(--font-semibold);
+  margin-bottom: var(--sp-1);
+  color: var(--text-primary);
+}
+.etf-desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--sp-3);
+}
+.etf-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--sp-1) 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.etf-stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.etf-stat-value {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+.compare-hint {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin-bottom: var(--sp-4);
+}
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+.mb-4 { margin-bottom: var(--sp-4); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .app { padding: var(--sp-3); }
+  .app-title { font-size: var(--text-2xl); }
+  .tabs { flex-direction: column; }
+  .cards { grid-template-columns: 1fr; }
+}
 </style>

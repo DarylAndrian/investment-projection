@@ -1,0 +1,155 @@
+/* ===================================================
+   INVESTMENT PROJECTION — DESIGN TOKENS
+   Scalable, token-driven architecture
+   =================================================== */
+
+:root {
+  /* ----- BRAND (Volcanic Orange) ----- */
+  --brand-50:  #FFF3E6;
+  --brand-100: #FEDEC0;
+  --brand-200: #FDBA8C;
+  --brand-300: #FB9055;
+  --brand-400: #FA6A22;
+  --brand-500: #E8630A;   /* PRIMARY */
+  --brand-600: #D45107;
+  --brand-700: #B44D07;   /* Burnt Ember */
+  --brand-800: #8A3B06;
+  --brand-900: #5C2804;
+
+  /* ----- NEUTRALS (Stone/Gray) ----- */
+  --gray-0:   #FAFAF7;    /* Cave White */
+  --gray-50:  #F5F5F2;
+  --gray-100: #EDEDE9;
+  --gray-200: #E0E0DB;
+  --gray-300: #C8C8C2;
+  --gray-400: #9E9E9E;    /* Pebble */
+  --gray-500: #6B7280;
+  --gray-600: #4A4A4A;    /* Stone Gray */
+  --gray-700: #3A3A3A;
+  --gray-800: #2D2D2D;    /* Charcoal */
+  --gray-900: #1A1A1A;    /* Deep Cave */
+
+  /* ----- SEMANTIC COLORS ----- */
+  --success:   #2E8B57;    /* Leaf Green */
+  --success-light: #E8F5EE;
+  --info:      #1CA8C4;    /* Sky Blue */
+  --info-light: #E8F7FA;
+  --warning:   #F5A623;    /* Amber */
+  --warning-light: #FFF3E0;
+  --danger:    #D32F2F;    /* Lava Red */
+  --danger-light: #FDE8E8;
+
+  /* ----- SURFACES & BACKGROUNDS ----- */
+  --surface-0: var(--gray-0);
+  --surface-1: #FFFFFF;
+  --surface-2: var(--gray-50);
+  --surface-3: var(--gray-100);
+  --bg-app:    var(--gray-0);
+  --bg-card:   var(--surface-1);
+  --bg-input:  var(--surface-1);
+
+  /* ----- TEXT ----- */
+  --text-primary:   var(--gray-800);
+  --text-secondary: var(--gray-600);
+  --text-tertiary:  var(--gray-400);
+  --text-inverse:   var(--gray-0);
+
+  /* ----- BORDERS ----- */
+  --border-light: var(--gray-200);
+  --border-medium: var(--gray-300);
+  --border-focus:  var(--info);
+
+  /* ----- TYPOGRAPHY ----- */
+  --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  --text-xs:   0.75rem;   /* 12px */
+  --text-sm:   0.875rem;  /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg:   1.125rem;  /* 18px */
+  --text-xl:   1.25rem;   /* 20px */
+  --text-2xl:  1.5rem;    /* 24px */
+  --text-3xl:  2rem;      /* 32px */
+
+  --font-light:      300;
+  --font-normal:     400;
+  --font-medium:     500;
+  --font-semibold:   600;
+  --font-bold:        700;
+
+  --leading-none:   1;
+  --leading-tight:  1.2;
+  --leading-snug:   1.375;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose:   2;
+
+  /* ----- SPACING (4px base) ----- */
+  --sp-1: 0.25rem;  /* 4px */
+  --sp-2: 0.5rem;   /* 8px */
+  --sp-3: 0.75rem;  /* 12px */
+  --sp-4: 1rem;     /* 16px */
+  --sp-5: 1.5rem;   /* 24px */
+  --sp-6: 2rem;     /* 32px */
+  --sp-8: 3rem;     /* 48px */
+  --sp-10: 4rem;    /* 64px */
+
+  /* ----- BORDER RADIUS ----- */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+  --radius-full: 9999px;
+
+  /* ----- SHADOWS ----- */
+  --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:  0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg:  0 10px 30px rgba(0, 0, 0, 0.12);
+  --shadow-xl:  0 20px 50px rgba(0, 0, 0, 0.16);
+
+  /* ----- TRANSITIONS ----- */
+  --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast:   150ms;
+  --duration-normal:  300ms;
+  --duration-slow:    500ms;
+
+  /* ----- Z-INDEX SCALE ----- */
+  --z-dropdown:   1000;
+  --z-sticky:      1100;
+  --z-overlay:     1200;
+  --z-modal:       1300;
+  --z-toast:       1400;
+  --z-tooltip:     1500;
+}
+
+/* ===================================================
+   DARK MODE
+   =================================================== */
+.dark {
+  --surface-0: #0F172A;
+  --surface-1: #1E293B;
+  --surface-2: #334155;
+  --surface-3: #475569;
+  --bg-app:    #0F172A;
+  --bg-card:   var(--surface-1);
+  --bg-input:  var(--surface-1);
+
+  --text-primary:   #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary:  #64748B;
+
+  --border-light: #334155;
+  --border-medium: #475569;
+
+  --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md:  0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg:  0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-xl:  0 20px 50px rgba(0, 0, 0, 0.6);
+
+  /* Brand slightly lighter in dark mode */
+  --brand-400: #FF8C42;
+  --brand-500: #FF9F5A;
+}
