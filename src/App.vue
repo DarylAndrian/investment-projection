@@ -173,13 +173,15 @@ const splitInputs = ref({
 
 // Chart data for single ETF
 const singleChartData = computed(() => {
+  const brandColor = getComputedStyle(document.documentElement).getPropertyValue('--brand-500').trim() || '#E8630A'
+  const warningColor = getComputedStyle(document.documentElement).getPropertyValue('--warning').trim() || '#F5A623'
   const datasets = []
   if (showPortfolio.value) {
     datasets.push({
       label: 'Portfolio Value',
       data: results.value.chartValues || [],
-      borderColor: '#E8630A',
-      backgroundColor: 'rgba(232, 99, 10, 0.1)',
+      borderColor: brandColor,
+      backgroundColor: brandColor + '1A', // 10% opacity
       fill: true,
       yAxisID: 'y',
       tension: 0.3
@@ -189,8 +191,8 @@ const singleChartData = computed(() => {
     datasets.push({
       label: 'Dividends',
       data: results.value.chartDividends,
-      borderColor: '#F5A623',
-      backgroundColor: 'rgba(245, 166, 35, 0.05)',
+      borderColor: warningColor,
+      backgroundColor: warningColor + '0D', // 5% opacity
       fill: false,
       yAxisID: 'y1',
       borderDash: [5, 5],
@@ -208,7 +210,7 @@ const singleChartOptions = computed(() => ({
     y: {
       title: { display: true, text: 'Portfolio Value ($)', font: { size: 12 } },
       ticks: {
-        color: '#E8630A',
+        color: getComputedStyle(document.documentElement).getPropertyValue('--brand-500').trim() || '#E8630A',
         font: { size: 11 },
         callback: formatAxisCurrency
       },
@@ -218,7 +220,7 @@ const singleChartOptions = computed(() => ({
       position: 'right',
       title: { display: true, text: 'Dividends ($)', font: { size: 12 } },
       ticks: {
-        color: '#F5A623',
+        color: getComputedStyle(document.documentElement).getPropertyValue('--warning').trim() || '#F5A623',
         font: { size: 11 },
         callback: formatAxisCurrency
       },
@@ -229,13 +231,15 @@ const singleChartOptions = computed(() => ({
 
 // Split chart data
 const splitChartData = computed(() => {
+  const successColor = getComputedStyle(document.documentElement).getPropertyValue('--success').trim() || '#2E8B57'
+  const infoColor = getComputedStyle(document.documentElement).getPropertyValue('--info').trim() || '#1CA8C4'
   const datasets = []
   if (showPortfolio.value) {
     datasets.push({
       label: 'Portfolio Value (Split)',
       data: results.value.chartValues || [],
-      borderColor: '#2E8B57',
-      backgroundColor: 'rgba(46, 139, 87, 0.1)',
+      borderColor: successColor,
+      backgroundColor: successColor + '1A', // 10% opacity
       fill: true,
       yAxisID: 'y',
       tension: 0.3
@@ -245,8 +249,8 @@ const splitChartData = computed(() => {
     datasets.push({
       label: 'Dividends (Split)',
       data: results.value.chartDividends,
-      borderColor: '#1CA8C4',
-      backgroundColor: 'rgba(28, 168, 196, 0.05)',
+      borderColor: infoColor,
+      backgroundColor: infoColor + '0D', // 5% opacity
       fill: false,
       yAxisID: 'y1',
       borderDash: [5, 5],
@@ -264,7 +268,7 @@ const splitChartOptions = computed(() => ({
     y: {
       title: { display: true, text: 'Portfolio Value ($)', font: { size: 12 } },
       ticks: {
-        color: '#2E8B57',
+        color: getComputedStyle(document.documentElement).getPropertyValue('--success').trim() || '#2E8B57',
         font: { size: 11 },
         callback: formatAxisCurrency
       },
@@ -274,7 +278,7 @@ const splitChartOptions = computed(() => ({
       position: 'right',
       title: { display: true, text: 'Dividends ($)', font: { size: 12 } },
       ticks: {
-        color: '#1CA8C4',
+        color: getComputedStyle(document.documentElement).getPropertyValue('--info').trim() || '#1CA8C4',
         font: { size: 11 },
         callback: formatAxisCurrency
       },
