@@ -195,13 +195,21 @@ const singleChartOptions = computed(() => ({
   scales: {
     y: {
       title: { display: true, text: 'Portfolio Value ($)', font: { size: 12 } },
-      ticks: { color: '#E8630A', font: { size: 11 } },
-      grid: { color: 'rgba(0,0,0,0.05)' }
+      ticks: {
+        color: '#E8630A',
+        font: { size: 11 },
+        callback: formatAxisCurrency
+      },
+      grid: { color: 'rgba(232, 99, 10, 0.08)' }
     },
     y1: {
       position: 'right',
       title: { display: true, text: 'Dividends ($)', font: { size: 12 } },
-      ticks: { color: '#F5A623', font: { size: 11 } },
+      ticks: {
+        color: '#F5A623',
+        font: { size: 11 },
+        callback: formatAxisCurrency
+      },
       grid: { drawOnChartArea: false }
     }
   }
@@ -242,17 +250,33 @@ const splitChartOptions = computed(() => ({
   scales: {
     y: {
       title: { display: true, text: 'Portfolio Value ($)', font: { size: 12 } },
-      ticks: { color: '#2E8B57', font: { size: 11 } },
-      grid: { color: 'rgba(0,0,0,0.05)' }
+      ticks: {
+        color: '#2E8B57',
+        font: { size: 11 },
+        callback: formatAxisCurrency
+      },
+      grid: { color: 'rgba(46, 139, 87, 0.08)' }
     },
     y1: {
       position: 'right',
       title: { display: true, text: 'Dividends ($)', font: { size: 12 } },
-      ticks: { color: '#1CA8C4', font: { size: 11 } },
+      ticks: {
+        color: '#1CA8C4',
+        font: { size: 11 },
+        callback: formatAxisCurrency
+      },
       grid: { drawOnChartArea: false }
     }
   }
 }))
+
+// Format axis currency (2 decimal places)
+function formatAxisCurrency(value) {
+  return value.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
 
 // Theme toggle
 function toggleTheme() {

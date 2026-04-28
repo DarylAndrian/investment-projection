@@ -2,22 +2,25 @@ import { defineStore } from 'pinia';
 
 // Financial constants for ETFs
 const ETF = {
-  JEPI: { yield: 0.0826, growth: 0.02, er: 0.0035, freq: 12, label: 'JEPI', color: '#378ADD' },
-  SCHD: { yield: 0.0335, growth: 0.07, er: 0.0006, freq: 4, label: 'SCHD', color: '#639922' }
+  JEPI: { yield: 0.0826, growth: 0.02, er: 0.0035, freq: 12, label: 'JEPI', color: '#E8630A' },
+  SCHD: { yield: 0.0335, growth: 0.07, er: 0.0006, freq: 4, label: 'SCHD', color: '#2E8B57' }
 };
 
 /**
  * Calculates the monthly dividend payout based on current assets and ETF specifics.
+ * Deducts expense ratio before dividend calculation.
  */
 function calculateDividend(balance, monthlyTopUp, etf, taxRate) {
   const annualDiv = (balance + monthlyTopUp) * etf.yield;
   const monthlyDiv = annualDiv / 12;
-  const netDiv = monthlyDiv * (1 - taxRate / 100);
+  const afterExpense = monthlyDiv * (1 - etf.er);
+  const netDiv = afterExpense * (1 - taxRate / 100);
   return Math.max(0, netDiv);
 }
 
 /**
  * Runs monthly simulation, returns results + chart data (labels + values over months).
+ * Compounds monthly, deducts expense ratio + fees.
  */
 function runSimulation(allocations, targetMonthlyIncome, taxRate) {
   const MAX_MONTHS = 300; // 25 years
@@ -25,7 +28,7 @@ function runSimulation(allocations, targetMonthlyIncome, taxRate) {
   const labels = [];
   const values = [];
   const dividends = [];
-  let cumulativeTopUp = 0;
+  let totalFees = 0;
 
   for (month = 1; month <= MAX_MONTHS; month++) {
     // Calculate total dividend across all allocations
@@ -42,19 +45,36 @@ function runSimulation(allocations, targetMonthlyIncome, taxRate) {
 
     // Check goal
     if (month > 1 && totalDiv >= targetMonthlyIncome) {
-      return { months: month, portfolioValue: totalBalance, reached: true, chartLabels: labels, chartValues: values, chartDividends: dividends };
+      return {
+        months: month,
+        portfolioValue: totalBalance,
+        reached: true,
+        chartLabels: labels,
+        chartValues: values,
+        chartDividends: dividends,
+        totalFees
+      };
     }
 
-    // Compound each allocation
+    // Compound each allocation (monthly growth - expense ratio)
     for (const alloc of allocations) {
       const monthlyGrowth = alloc.etf.growth / 12;
-      // Track cumulative top-up separately if needed, but here we simply add to balance
-      alloc.balance = alloc.balance * (1 + monthlyGrowth) + alloc.monthlyTopUp;
+      const monthlyFee = alloc.balance * (alloc.etf.er / 12);
+      totalFees += monthlyFee;
+      alloc.balance = alloc.balance * (1 + monthlyGrowth) - monthlyFee + alloc.monthlyTopUp;
     }
   }
 
   const finalBalance = allocations.reduce((sum, a) => sum + a.balance, 0);
-  return { months: MAX_MONTHS, portfolioValue: finalBalance, reached: false, chartLabels: labels, chartValues: values, chartDividends: dividends };
+  return {
+    months: MAX_MONTHS,
+    portfolioValue: finalBalance,
+    reached: false,
+    chartLabels: labels,
+    chartValues: values,
+    chartDividends: dividends,
+    totalFees
+  };
 }
 
 export const useCalculatorStore = defineStore('calculator', {
@@ -104,6 +124,7 @@ export const useCalculatorStore = defineStore('calculator', {
       let chartLabels = [];
       let chartValues = [];
       let chartDividends = [];
+      let totalFees = 0;
 
       if (this.selectedEtf === 'JEPI' || this.selectedEtf === 'SCHD') {
         const etf = ETF[this.selectedEtf];
@@ -123,6 +144,7 @@ export const useCalculatorStore = defineStore('calculator', {
         chartLabels = simulation.chartLabels;
         chartValues = simulation.chartValues;
         chartDividends = simulation.chartDividends;
+        totalFees = simulation.totalFees;
 
       } else if (this.selectedEtf === 'SPLIT') {
         const jepiBalance = start * splitRatio / 100;
@@ -153,16 +175,20 @@ export const useCalculatorStore = defineStore('calculator', {
         chartLabels = simulation.chartLabels;
         chartValues = simulation.chartValues;
         chartDividends = simulation.chartDividends;
+        totalFees = simulation.totalFees;
       }
 
       this.results.currentNetDiv = netDivResult;
       this.results.timeToGoalMonths = goalMonths;
       this.results.portfolioValueAtGoal = finalValue;
       this.results.isGoalReached = isReached;
-      this.results.metrics = { etfDetails };
+      this.results.metrics = { etfDetails, totalFees };
       this.results.chartLabels = chartLabels;
       this.results.chartValues = chartValues;
       this.results.chartDividends = chartDividends;
+
+      // Persist inputs to localStorage
+      localStorage.setItem('investment-inputs', JSON.stringify(this.inputs));
     }
   }
 });
