@@ -5,8 +5,9 @@ import Aura from '@primeuix/themes/aura'
 import { InvestmentPassThrough } from './themes/investment-preset.js'
 import App from './App.vue'
 
-// Global styles (tokens first, then component styles)
-import '../public/tokens.css'
+// Global styles (tokens FIRST, then component styles)
+// NOTE: tokens.css is now loaded via index.html (as a raw CSS link)
+// to avoid Vue scoped CSS issues with :root and .dark selectors
 import './assets/styles.css'
 
 const pinia = createPinia()
