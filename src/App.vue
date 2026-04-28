@@ -49,12 +49,16 @@
       <!-- Chart -->
       <ChartSection title="Projection" :empty="!results.chartValues?.length">
         <template #controls>
-          <Button
-            :label="showDividends ? 'Hide Dividends' : 'Show Dividends'"
-            :outlined="!showDividends"
-            size="small"
-            @click="showDividends = !showDividends"
-          />
+          <div class="chart-toggles">
+            <label class="toggle-label">
+              <input type="checkbox" v-model="showPortfolio" />
+              <span>Portfolio Value</span>
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" v-model="showDividends" />
+              <span>Dividends</span>
+            </label>
+          </div>
         </template>
         <ChartVisualization :chartData="singleChartData" :options="singleChartOptions" />
       </ChartSection>
@@ -80,12 +84,16 @@
 
       <ChartSection title="Split Projection" :empty="!results.chartValues?.length">
         <template #controls>
-          <Button
-            :label="showDividends ? 'Hide Dividends' : 'Show Dividends'"
-            :outlined="!showDividends"
-            size="small"
-            @click="showDividends = !showDividends"
-          />
+          <div class="chart-toggles">
+            <label class="toggle-label">
+              <input type="checkbox" v-model="showPortfolio" />
+              <span>Portfolio Value</span>
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" v-model="showDividends" />
+              <span>Dividends</span>
+            </label>
+          </div>
         </template>
         <ChartVisualization :chartData="splitChartData" :options="splitChartOptions" />
       </ChartSection>
@@ -137,8 +145,11 @@ import ChartVisualization from './components/ChartVisualization.vue'
 const store = useCalculatorStore()
 const activeTab = ref('single')
 const singleEtf = ref('JEPI')
-const showDividends = ref(true)
 const isDark = ref(false)
+
+// Chart visibility toggles
+const showPortfolio = ref(true)
+const showDividends = ref(true)
 
 // Tab config
 const tabs = [
@@ -162,8 +173,9 @@ const splitInputs = ref({
 
 // Chart data for single ETF
 const singleChartData = computed(() => {
-  const datasets = [
-    {
+  const datasets = []
+  if (showPortfolio.value) {
+    datasets.push({
       label: 'Portfolio Value',
       data: results.value.chartValues || [],
       borderColor: '#E8630A',
@@ -171,8 +183,8 @@ const singleChartData = computed(() => {
       fill: true,
       yAxisID: 'y',
       tension: 0.3
-    }
-  ]
+    })
+  }
   if (showDividends.value && results.value.chartDividends?.length) {
     datasets.push({
       label: 'Dividends',
@@ -217,8 +229,9 @@ const singleChartOptions = computed(() => ({
 
 // Split chart data
 const splitChartData = computed(() => {
-  const datasets = [
-    {
+  const datasets = []
+  if (showPortfolio.value) {
+    datasets.push({
       label: 'Portfolio Value (Split)',
       data: results.value.chartValues || [],
       borderColor: '#2E8B57',
@@ -226,8 +239,8 @@ const splitChartData = computed(() => {
       fill: true,
       yAxisID: 'y',
       tension: 0.3
-    }
-  ]
+    })
+  }
   if (showDividends.value && results.value.chartDividends?.length) {
     datasets.push({
       label: 'Dividends (Split)',
@@ -435,6 +448,25 @@ watch(splitInputs, (v) => {
   font-family: var(--font-mono);
 }
 .mb-4 { margin-bottom: var(--sp-4); }
+
+.chart-toggles {
+  display: flex;
+  gap: var(--sp-4);
+  align-items: center;
+}
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+.toggle-label input[type="checkbox"] {
+  accent-color: var(--brand-500);
+  cursor: pointer;
+}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
