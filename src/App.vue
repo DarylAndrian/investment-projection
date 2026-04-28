@@ -302,11 +302,11 @@ function toggleTheme() {
 }
 
 function applyTheme() {
-  const root = document.documentElement
+  const appEl = document.getElementById('app')
   if (isDark.value) {
-    root.classList.add('dark')
+    appEl?.classList.add('dark')
   } else {
-    root.classList.remove('dark')
+    appEl?.classList.remove('dark')
   }
   localStorage.setItem('investment-theme', isDark.value ? 'dark' : 'light')
 }
