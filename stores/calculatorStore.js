@@ -37,8 +37,8 @@ function runSimulation(allocations, targetMonthlyIncome, taxRate) {
     // Record portfolio value and dividend for chart
     const totalBalance = allocations.reduce((sum, a) => sum + a.balance, 0);
     labels.push(`Month ${month}`);
-    values.push(Math.floor(totalBalance));
-    dividends.push(Math.floor(totalDiv));
+    values.push(parseFloat(totalBalance.toFixed(2)));
+    dividends.push(parseFloat(totalDiv.toFixed(2)));
 
     // Check goal
     if (month > 1 && totalDiv >= targetMonthlyIncome) {

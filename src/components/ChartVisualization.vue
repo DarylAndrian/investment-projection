@@ -9,7 +9,8 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-// Dynamically import Chart.js for smaller initial bundle
+
+// Dynamic import Chart.js for smaller initial bundle
 let Chart = null
 let registered = false
 
@@ -33,6 +34,14 @@ async function ensureChart() {
   return Chart
 }
 
+// Format currency with 2 decimal places
+function formatCurrency(value) {
+  return value.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
 const props = defineProps({
   chartData: { type: Object, required: true },
   options: { type: Object, default: () => ({}) },
@@ -49,6 +58,10 @@ async function createChart() {
 
   const ChartClass = await ensureChart()
   const ctx = canvas.value.getContext('2d')
+  const textPrimary = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()
+  const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
+  const borderLight = getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim()
+
   chartInstance = new ChartClass(ctx, {
     type: 'line',
     data: props.chartData,
@@ -63,7 +76,7 @@ async function createChart() {
             usePointStyle: true,
             padding: 16,
             font: { size: 12 },
-            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()
+            color: textPrimary
           }
         },
         tooltip: {
@@ -82,23 +95,25 @@ async function createChart() {
           ticks: {
             maxTicksLimit: 12,
             font: { size: 11 },
-            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
+            color: textSecondary
           }
         },
         y: {
           ticks: {
             font: { size: 11 },
-            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
+            color: textSecondary,
+            callback: formatCurrency
           },
           grid: {
-            color: 'rgba(0,0,0,0.05)'
+            color: borderLight
           }
         },
         y1: {
           position: 'right',
           ticks: {
             font: { size: 11 },
-            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
+            color: textSecondary,
+            callback: formatCurrency
           },
           grid: { drawOnChartArea: false }
         },
@@ -127,8 +142,9 @@ onBeforeUnmount(() => {
 <style scoped>
 .chart-viz {
   position: relative;
-  height: 280px;
+  height: 100%;
   width: 100%;
+  min-height: 280px;
 }
 .chart-viz canvas {
   width: 100% !important;
