@@ -173,8 +173,9 @@ const splitInputs = ref({
 
 // Chart data for single ETF
 const singleChartData = computed(() => {
-  const brandColor = getComputedStyle(document.documentElement).getPropertyValue('--brand-500').trim() || '#E8630A'
-  const warningColor = getComputedStyle(document.documentElement).getPropertyValue('--warning').trim() || '#F5A623'
+  const appEl = document.getElementById('app')
+  const brandColor = appEl ? getComputedStyle(appEl).getPropertyValue('--brand-500').trim() : '#E8630A'
+  const warningColor = appEl ? getComputedStyle(appEl).getPropertyValue('--warning').trim() : '#F5A623'
   const datasets = []
   if (showPortfolio.value) {
     datasets.push({
@@ -231,8 +232,9 @@ const singleChartOptions = computed(() => ({
 
 // Split chart data
 const splitChartData = computed(() => {
-  const successColor = getComputedStyle(document.documentElement).getPropertyValue('--success').trim() || '#2E8B57'
-  const infoColor = getComputedStyle(document.documentElement).getPropertyValue('--info').trim() || '#1CA8C4'
+  const appEl = document.getElementById('app')
+  const successColor = appEl ? getComputedStyle(appEl).getPropertyValue('--success').trim() : '#2E8B57'
+  const infoColor = appEl ? getComputedStyle(appEl).getPropertyValue('--info').trim() : '#1CA8C4'
   const datasets = []
   if (showPortfolio.value) {
     datasets.push({

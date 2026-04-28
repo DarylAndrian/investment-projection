@@ -64,10 +64,11 @@ async function createChart() {
 
   const ChartClass = await ensureChart()
   const ctx = canvas.value.getContext('2d')
-  const textPrimary = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()
-  const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
-  const borderLight = getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim()
-  const darkMode = isDarkMode()
+  const appEl = document.getElementById('app')
+  const textPrimary = appEl ? getComputedStyle(appEl).getPropertyValue('--text-primary').trim() : '#000'
+  const textSecondary = appEl ? getComputedStyle(appEl).getPropertyValue('--text-secondary').trim() : '#666'
+  const borderLight = appEl ? getComputedStyle(appEl).getPropertyValue('--border-light').trim() : '#ddd'
+  const darkMode = appEl ? appEl.classList.contains('dark') : false
 
   chartInstance = new ChartClass(ctx, {
     type: 'line',
